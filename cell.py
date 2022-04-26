@@ -33,7 +33,7 @@ def draw(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             Cell.cell_grid[r][c].draw(surface)
-def display_current_board_information(cell_size,):
+def display_current_board_information(cell_size, show_info):
     cell_size_info = f'cell size : {cell_size}'
     iteration_info = f'iteration num : {Cell.iteration_num}'
     iteration_new_info = f'iteration new num : {Cell.iteration_new_num}'
@@ -41,14 +41,14 @@ def display_current_board_information(cell_size,):
     clean_bigger_info = f'clean bigger info : {Cell.clean_bigger_num}'
     clean_huge_info = f'clean huge info : {Cell.clean_huge_num}'
     wall_num_info = f'wall num : {Cell.wall_num}'
-    
-    display_info(cell_size_info, 10, 10)
-    display_info(iteration_info, 10, 30)
-    display_info(iteration_new_info, 10, 50)
-    display_info(clean_info, 10, 70)
-    display_info(clean_bigger_info, 10, 90)
-    display_info(clean_huge_info, 10, 110)
-    display_info(wall_num_info, 10, 130 )
+    if show_info:
+        display_info(cell_size_info, 10, 10)
+        display_info(iteration_info, 10, 30)
+        display_info(iteration_new_info, 10, 50)
+        display_info(clean_info, 10, 70)
+        display_info(clean_bigger_info, 10, 90)
+        display_info(clean_huge_info, 10, 110)
+        display_info(wall_num_info, 10, 130 )
     
     
 def display_info(info, x = 10, y = 10):

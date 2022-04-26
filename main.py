@@ -5,23 +5,24 @@ from cell import *
 from time_wait import regular_interval_tick_wait
 
 """
-TODO make cell check larger radious of surrounding cells
-TODO move instructions to separate file maybe its own class
-TODO Implement different Cell classes working independetly from other
-     Cell classes
-TODO menu where you can select the instructions already made
-TODO Implement show what commands you have already used
-     with a toggle button
-TODO Make menu show key bindings
-TODO Implement territory system, traverse islands and divide
-     territory by amoount of tiles traversed
-TODO Implemet algorithm to to place birdges down
-TODO Implement algorithm to identify islands
-TODO Implement algorithm to identify empty spaces, use said
-     empty space to spawn pre-made buildings, chests, enemies, bosses, etc..
+------------- RESTRUCTURING -------------
+TODO add event parser class if game loop gets too long
+TODO intructions have to be their own class
+     move perform_instruction function to new class
+TODO Implement a queue for the instruction
+     --get rid of hardcoding instructions--
+------------- ------------- -------------
+------------- MENU -------------
+TODO Make menu
+TODO Be able show key bindings
+TODO Be able to create instructions in the menu
+TODO Be able to save instructions
+TODO Be able to load instructions
+TODO Be able to delete instructions
+------------- ---- -------------
 """
 
-
+show_board_info = False
 done = False
 screen = Screen(1600,900, FULLSCREEN)
 screen.display()
@@ -102,7 +103,7 @@ def perform_instructions(instruction):
                 print(index, size)
                 total += instruction[index][1]
             instruction[index][0](screen.surface)
-            display_current_board_information(cell_size)
+            display_current_board_information(cell_size, show_board_info)
             pygame.display.update()
 def handle_cell_size_increase(change, cell_size):
     new_size = cell_size + change
@@ -142,7 +143,10 @@ while not done:
                 cell_size = handle_cell_size_decrease(5, cell_size)
                 generate_cells(screen, cell_size)
                 draw(screen.surface)
-    display_current_board_information(cell_size)
+            if event.key == pygame.K_s:
+                show_board_info = not show_board_info
+                draw(screen.surface)
+    display_current_board_information(cell_size, show_board_info)
                     
                 
     pygame.display.update()

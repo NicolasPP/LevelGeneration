@@ -1,0 +1,9 @@
+w - add_walls command
+c - clean_up_bigger comand
+i - iterate command
+n - iterate_new command
+r - randomise command
+TAB - perform_instruction
+UP - increse size of cell
+DOWN - decrese size of cell
+s - toggle show board information
