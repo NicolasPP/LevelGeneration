@@ -5,6 +5,7 @@ from cell import *
 from time_wait import regular_interval_tick_wait
 
 """
+TODO make cell check larger radious of surrounding cells
 TODO move instructions to separate file maybe its own class
 TODO Implement different Cell classes working independetly from other
      Cell classes
@@ -70,7 +71,7 @@ instructions_5 = [
     [clean_up, 2],
     [add_walls, 1]
 ]
-
+# FIXME this stops in the last instruction
 instructions_trip = [
     [randomise, 1],
     [clean_up_bigger, 7],
@@ -83,23 +84,29 @@ instructions_trip = [
     [iterate_new, 25]
 ]
 
+instructions_trip = [
+    [iterate_new, 100]
+]
+
 # UI functions 
 def perform_instructions(instruction):
-    size = len(instruction) -1
+    size = len(instruction) - 1
     index = 0
     count = 0
     total = instruction[index][1]
-    while index < size:
+    while index <= size:
         if regular_interval_tick_wait(DELAY):
+            count += 1
             if count == total:
                 index+=1
+                print(index, size)
                 total += instruction[index][1]
-            count += 1
             instruction[index][0](screen.surface)
+            display_current_board_information(cell_size)
             pygame.display.update()
 def handle_cell_size_increase(change, cell_size):
     new_size = cell_size + change
-    if new_size <= screen.current_height and new_size <= screen.current_width:
+    if new_size <= screen.current_height // 10 and new_size <= screen.current_width // 10:
         return new_size
     return cell_size
 def handle_cell_size_decrease(change, cell_size):
