@@ -1,0 +1,5 @@
+iterate every tile that is NOT on the edge of the map
+n - neighbour number
+n = 0 - wall
+n = 4 - empty
+n >= 5 - wall
