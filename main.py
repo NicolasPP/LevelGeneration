@@ -1,4 +1,4 @@
-from ast import In
+from time_wait import regular_interval_tick_wait
 import pygame
 from config import FULLSCREEN, DELAY
 from screen import Screen
@@ -22,6 +22,8 @@ TODO Be able to delete instructions
 show_board_info = False
 show_key_binds = False
 done = False
+perform = False
+perform_index = 0
 screen = Screen(1600,900, FULLSCREEN)
 screen.display()
 instruction_manager = Instructions()
@@ -47,8 +49,11 @@ while not done:
                 iterate_new(screen.surface)
             if event.key == pygame.K_r:
                 randomise(screen.surface)
-            if event.key == pygame.K_TAB:
-                instruction_manager.perform(screen, show_board_info)
+            if event.key == pygame.K_TAB and not perform:
+                perform = not perform
+                perform_index = 0
+                instruction_manager.handle_optional_resize(screen)
+                # instruction_manager.perform(screen, show_board_info)
             if event.key == pygame.K_UP:
                 handle_cell_size_increase(5, screen)
                 generate_cells(screen)
@@ -67,6 +72,11 @@ while not done:
             if event.key == pygame.K_k:
                 show_board_info = not show_board_info
                 draw(screen.surface)
+    if perform:
+        if regular_interval_tick_wait(DELAY):
+            perform = instruction_manager.perform(perform_index, screen)
+            perform_index += 1
+            
     display_current_board_information(show_board_info)
     display_current_instruction_info(instruction_manager.get_current_instruction(), screen, show_board_info)
     display_key_binds()

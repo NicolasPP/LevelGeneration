@@ -1,7 +1,7 @@
 WALL = 'Green'
 EMPTY = 'Blue'
 FULLSCREEN = False
-DELAY = 100
+DELAY = 60
 NAME = "name"
 INFO = "info"
 CELL_S = "cell_size"

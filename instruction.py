@@ -33,27 +33,23 @@ class Instructions:
         
         with open(self.file, "w") as out_file:
             json.dump(self.instructions, out_file)
-    
-    def perform(self, screen, show_info):
-        current_instruction = self.get_current_instruction()
-        optional_size_change  = current_instruction[INFO][CELL_S]
+
+    def handle_optional_resize(self, screen):
+        self.current_instruction = self.get_current_instruction()
+        optional_size_change  = self.current_instruction[INFO][CELL_S]
         if optional_size_change != False: 
-            handle_set_cell_size(current_instruction[INFO][CELL_S], screen)
+            handle_set_cell_size(self.current_instruction[INFO][CELL_S], screen)
             generate_cells(screen)
             draw(screen.surface)
-        instruction = current_instruction[INFO][INST]
-        size = len(instruction) 
-        index = 0
-        while True:
-            if index >= size: 
-                break
-            if regular_interval_tick_wait(DELAY):
-                id = instruction[index]
-                id_func[id](screen.surface)
-                index += 1
-                display_current_board_information(show_info)
-                display_current_instruction_info(self.get_current_instruction(), screen, show_info)
-                pygame.display.update()
+        
+    def perform(self, index, screen):
+        ids = self.current_instruction[INFO][INST]
+        current_func_id = ids[index]
+        func = id_func[current_func_id]
+        func(screen.surface)
+        if index == len(ids) -1:
+            return False
+        return True
     
     def increase_index(self):
         if self.index + 1 < len(self.instructions):
