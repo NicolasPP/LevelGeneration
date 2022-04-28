@@ -7,3 +7,5 @@ TAB - perform_instruction
 UP - increse size of cell
 DOWN - decrese size of cell
 s - toggle show board information
+RIGH - next instruction
+LEFT - previous instruction

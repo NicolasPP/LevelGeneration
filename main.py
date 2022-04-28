@@ -103,7 +103,7 @@ def perform_instructions(instruction):
                 print(index, size)
                 total += instruction[index][1]
             instruction[index][0](screen.surface)
-            display_current_board_information(cell_size, show_board_info)
+            display_current_board_information(cell_size, 'trip', show_board_info)
             pygame.display.update()
 def handle_cell_size_increase(change, cell_size):
     new_size = cell_size + change
@@ -146,9 +146,7 @@ while not done:
             if event.key == pygame.K_s:
                 show_board_info = not show_board_info
                 draw(screen.surface)
-    display_current_board_information(cell_size, show_board_info)
-                    
-                
+    display_current_board_information(cell_size, 'trip', show_board_info)           
     pygame.display.update()
     
 
