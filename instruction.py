@@ -52,6 +52,7 @@ class Instructions:
                 id_func[id](screen.surface)
                 index += 1
                 display_current_board_information(show_info)
+                display_current_instruction_info(self.get_current_instruction(), screen, show_info)
                 pygame.display.update()
     
     def increase_index(self):
