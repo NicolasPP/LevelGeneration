@@ -74,7 +74,7 @@ while not done:
             if event.key == pygame.K_r:
                 randomise(screen.surface)
             if event.key == pygame.K_TAB:
-                instruction_manager.perform(screen)
+                instruction_manager.perform(screen, show_board_info)
                 # perform_instructions(instructions_35)
             if event.key == pygame.K_UP:
                 handle_cell_size_increase(5, screen)

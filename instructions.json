@@ -1,1 +1,41 @@
-[{"name": "Instruction_35", "info": {"cell_size": 35, "instructions": [5, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 1]}}, {"name": "Instruction_open_10", "info": {"cell_size": 10, "instructions": [5, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1]}}, {"name": "Instruction_island_10", "info": {"cell_size": 10, "instructions": [5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 2, 2, 2, 2, 2, 1]}}, {"name": "Instruction_5", "info": {"cell_size": 5, "instructions": [5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 2, 2, 1]}}]
+[
+  {
+    "name": "Instruction_35",
+    "info": {
+      "cell_size": 35,
+      "instructions": [
+        5, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 1
+      ]
+    }
+  },
+  {
+    "name": "Instruction_open_10",
+    "info": {
+      "cell_size": 10,
+      "instructions": [
+        5, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3,
+        2, 2, 2, 2, 2, 2, 2, 1
+      ]
+    }
+  },
+  {
+    "name": "Instruction_island_10",
+    "info": {
+      "cell_size": 10,
+      "instructions": [
+        5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3,
+        2, 2, 2, 2, 2, 1
+      ]
+    }
+  },
+  {
+    "name": "Instruction_5",
+    "info": {
+      "cell_size": 5,
+      "instructions": [
+        5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 4, 2, 2, 1
+      ]
+    }
+  }
+]

@@ -1,6 +1,7 @@
 import os
 from cell import *
 import json
+from time_wait import regular_interval_tick_wait
 
 func_id = {
     add_walls: 1,
@@ -10,6 +11,16 @@ func_id = {
     randomise: 5,
     iterate: 6,
     iterate_new: 7,
+}
+
+id_func = {
+    1: add_walls,
+    2: clean_up,
+    3: clean_up_bigger,
+    4: clean_up_huge,
+    5: randomise,
+    6: iterate,
+    7: iterate_new,
 }
 
 name = "name"
@@ -46,12 +57,25 @@ class Instructions:
         with open(self.file, "w") as out_file:
             json.dump(self.instructions, out_file)
     
-    def perform(self, screen):
+    def perform(self, screen, show_info):
         current_instruction = self.instructions[self.index]
-        print(current_instruction[info][cell_S])
-        # set_cell_size(current_instruction[info][cell_S])
-        generate_cells(screen)
-        draw(screen.surface)
+        optional_size_change  = current_instruction[info][cell_S]
+        if optional_size_change != False: 
+            handle_set_cell_size(current_instruction[info][cell_S], screen)
+            generate_cells(screen)
+            draw(screen.surface)
+        instruction = current_instruction[info][inst]
+        size = len(instruction) 
+        index = 0
+        while True:
+            if index >= size: 
+                break
+            if regular_interval_tick_wait(DELAY):
+                id = instruction[index]
+                id_func[id](screen.surface)
+                index += 1
+                display_current_board_information(Instructions.current_instruction, show_info)
+                pygame.display.update()
     
     def increase_index(self):
         if self.index + 1 < len(self.instructions):
@@ -63,77 +87,6 @@ class Instructions:
             self.index -= 1
             Instructions.current_instruction = self.instructions[self.index][name]
             
-            
-            
-    
-    
-
-# def perform_instructions(instruction):
-#     size = len(instruction) - 1
-#     index = 0
-#     count = 0
-#     total = instruction[index][1]
-#     while True:
-#         if index >= size:
-#             return 
-#         if regular_interval_tick_wait(DELAY):
-#             count += 1
-#             if count == total:
-#                 index+=1
-#                 print(index, size)
-#                 total += instruction[index][1]
-#             instruction[index][0](screen.surface)
-#             display_current_board_information(cell_size, 'trip', show_board_info)
-#             pygame.display.update()
-# good for tile size 30 to 40
-
-# instructions_35 = [
-#     "Instruction_35",
-#     35,
-#     [randomise, 1],
-#     [clean_up, 1],
-#     [iterate, 16],
-#     [clean_up_bigger, 1],
-#     [add_walls, 1]
-# ]
-
-
-
-#good for large open spaces
-# instructions_10 = [
-#     "Instruction_open_10",
-#     10,
-#     [randomise, 1],
-#     [clean_up_huge, 1],
-#     [iterate, 20],
-#     [clean_up_bigger, 2],
-#     [clean_up , 7],
-#     [add_walls, 1]
-# ]
-
-
-# good for islands and more coast
-# instructions_10 = [
-#     "Instruction_island_10",
-#     10, 
-#     [randomise, 1],
-#     [clean_up_bigger, 1],
-#     [iterate, 20],
-#     [clean_up_bigger, 2],
-#     [clean_up , 5],
-#     [add_walls, 1]
-# ]
-
-# instructions_5 = [
-#     "Instruction_5",
-#     5,
-#     [randomise, 1],
-#     [clean_up_bigger, 1],
-#     [iterate, 25],
-#     [clean_up_huge, 1],
-#     [clean_up, 2],
-#     [add_walls, 1]
-# ]
 
 instructions_trip = [
     "Trip",
@@ -148,28 +101,3 @@ instructions_trip = [
     [clean_up_bigger, 7],
     [iterate_new, 25]
 ]
-
-# w = [
-#     {
-#     "name" : "Instruction_35",
-#     "info" : {"cell_size" : 35,"instructions" : [5,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,1]}
-#     },
-#     {
-#     "name" : "Instruction_open_10",
-#     "info" : {"cell_size" : 10,"instructions" : [5, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 2, 2, 2, 2, 2, 2, 2, 1]}
-#     },
-#     {
-#     "name" : "Instruction_island_10",
-#     "info" : {"cell_size" : 10,"instructions" : [5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 2, 2, 2, 2, 2, 1]}
-#     },
-#     {
-#     "name" : "Instruction_5",
-#     "info" : {"cell_size" : 5,"instructions" : [5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 2, 2, 1]}
-#     }
-# ]
-# manager = Instructions()
-# for i in w:
-#     manager.add(i)
-    
-# manager.write_instructions()
-# print(len(manager.instructions))
