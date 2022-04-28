@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+ideas.txt
+initial_rules.txt
+key_binds.txt
