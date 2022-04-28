@@ -34,26 +34,7 @@ generate_cells(screen)
 draw(screen.surface)
 
 
-show_commands_uses = False
-
-# UI functions 
-# def perform_instructions(instruction):
-#     size = len(instruction) - 1
-#     index = 0
-#     count = 0
-#     total = instruction[index][1]
-#     while True:
-#         if index >= size:
-#             return 
-#         if regular_interval_tick_wait(DELAY):
-#             count += 1
-#             if count == total:
-#                 index+=1
-#                 total += instruction[index][1]
-#             instruction[index][0](screen.surface)
-#             display_current_board_information('trip', show_board_info)
-#             pygame.display.update()
-
+show_commands_uses = False    
                     
         
 while not done:
@@ -75,7 +56,6 @@ while not done:
                 randomise(screen.surface)
             if event.key == pygame.K_TAB:
                 instruction_manager.perform(screen, show_board_info)
-                # perform_instructions(instructions_35)
             if event.key == pygame.K_UP:
                 handle_cell_size_increase(5, screen)
                 generate_cells(screen)
