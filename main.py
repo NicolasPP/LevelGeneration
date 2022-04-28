@@ -20,16 +20,14 @@ TODO Be able to delete instructions
 """
 
 show_board_info = False
+show_key_binds = False
 done = False
 screen = Screen(1600,900, FULLSCREEN)
 screen.display()
 instruction_manager = Instructions()
 
 generate_cells(screen)
-draw(screen.surface)
-
-
-show_commands_uses = False    
+draw(screen.surface)   
                     
         
 while not done:
@@ -66,8 +64,12 @@ while not done:
             if event.key == pygame.K_s:
                 show_board_info = not show_board_info
                 draw(screen.surface)
+            if event.key == pygame.K_k:
+                show_board_info = not show_board_info
+                draw(screen.surface)
     display_current_board_information(show_board_info)
     display_current_instruction_info(instruction_manager.get_current_instruction(), screen, show_board_info)
+    display_key_binds()
     pygame.display.update()
     
 

@@ -70,6 +70,8 @@ def display_current_instruction_info(instruction, screen, show_info):
                 amount = info[1]
                 func_info = f'{name} : {amount}'
                 display_info(func_info, pos_x, pos_y)
+def display_key_binds():
+    pass
 def display_info(info, x = 10, y = 10):
     font = pygame.font.Font(None, 20)
     debug_render = font.render(info,True,'White')
