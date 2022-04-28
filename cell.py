@@ -9,6 +9,7 @@ class Cell:
     column_num = 0
     
     ## info ##
+    cell_size = 20  
     iteration_num = 0
     iteration_new_num = 0
     clean_num = 0
@@ -17,24 +18,25 @@ class Cell:
     wall_num = 0
     
     
-    def __init__(self, left, top, is_edge, cell_size):
-        self.cell_size = cell_size
+    def __init__(self, left, top, is_edge):
+        self.cell_size = Cell.cell_size
         self.is_edge = is_edge
-        self.rect = pygame.Rect(left, top, cell_size, cell_size)
+        self.rect = pygame.Rect(left, top, Cell.cell_size, Cell.cell_size)
         self.state = 0 if is_edge else randint(0,1)
     
     def draw(self, surface, colour = None):
         if not colour:
             colour =  WALL if self.state == 1 else EMPTY
         pygame.draw.rect(surface, colour, self.rect)
-        
+         
 # Draw functions
 def draw(surface):
+    surface.fill('white')  
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             Cell.cell_grid[r][c].draw(surface)
-def display_current_board_information(cell_size, instruction_name, show_info):
-    cell_size_info = f'cell size : {cell_size}'
+def display_current_board_information(instruction_name, show_info):
+    cell_size_info = f'cell size : {Cell.cell_size}'
     iteration_info = f'iteration num : {Cell.iteration_num}'
     iteration_new_info = f'iteration new num : {Cell.iteration_new_num}'
     clean_info = f'clean up info : {Cell.clean_num}'
@@ -50,9 +52,7 @@ def display_current_board_information(cell_size, instruction_name, show_info):
         display_info(clean_bigger_info, 10, 90)
         display_info(clean_huge_info, 10, 110)
         display_info(wall_num_info, 10, 130 )
-        display_info(instruction_info, 10, 150)
-    
-    
+        display_info(instruction_info, 10, 150)   
 def display_info(info, x = 10, y = 10):
     font = pygame.font.Font(None, 20)
     debug_render = font.render(info,True,'White')
@@ -134,16 +134,17 @@ def is_wall(cell):
     if count < 7:
         return True if cell.state == 1 else False
 
-def generate_cells(screen, cell_size):
-    columns = screen.current_width // cell_size
-    rows = screen.current_height // cell_size
+def generate_cells(screen):
+    columns = screen.current_width // Cell.cell_size
+    rows = screen.current_height // Cell.cell_size
     Cell.column_num = columns
     Cell.row_num = rows
-    cell_grid = [[Cell(c * cell_size,r * cell_size, is_edge(r, c), cell_size) 
+    cell_grid = [[Cell(c * Cell.cell_size,r * Cell.cell_size, is_edge(r, c)) 
                   for c in range(columns)]
                  for r in range(rows)]
     Cell.cell_grid = cell_grid
     generate_neighbour_dict()
+    draw(screen.surface)
 def generate_neighbour_dict():
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
@@ -161,6 +162,18 @@ def reset_info():
     Cell.clean_bigger_num = 0
     Cell.clean_huge_num = 0
     Cell.wall_num = 0
+
+def handle_cell_size_increase(change, screen):
+    new_size = Cell.cell_size + change
+    if new_size <= screen.current_height // 10 and new_size <= screen.current_width // 10:
+        Cell.cell_size = new_size
+def handle_cell_size_decrease(change):
+    new_size = Cell.cell_size - change
+    if new_size > 0:
+        Cell.cell_size = new_size      
+def handle_set_cell_size(new_size, screen):
+     if new_size >= 5 and new_size <= screen.current_width // 10 and new_size <= screen.current_height:
+            Cell.cell_size = new_size   
 
 # Instruction commands
 def add_walls(surface):
