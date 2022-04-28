@@ -35,7 +35,8 @@ def draw(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             Cell.cell_grid[r][c].draw(surface)
-def display_current_board_information(instruction_name, show_info):
+def display_current_board_information(show_info):
+    info_name = "--- Current Board Info ---"
     cell_size_info = f'cell size : {Cell.cell_size}'
     iteration_info = f'iteration num : {Cell.iteration_num}'
     iteration_new_info = f'iteration new num : {Cell.iteration_new_num}'
@@ -43,24 +44,54 @@ def display_current_board_information(instruction_name, show_info):
     clean_bigger_info = f'clean bigger info : {Cell.clean_bigger_num}'
     clean_huge_info = f'clean huge info : {Cell.clean_huge_num}'
     wall_num_info = f'wall num : {Cell.wall_num}'
-    instruction_info = f'instruction : {instruction_name}'
+    info = [
+        info_name,
+        cell_size_info,
+        iteration_info,
+        iteration_new_info,
+        clean_info,
+        clean_bigger_info,
+        clean_huge_info,
+        wall_num_info,
+    ]
+    pos_x = pos_y = 10
     if show_info:
-        display_info(cell_size_info, 10, 10)
-        display_info(iteration_info, 10, 30)
-        display_info(iteration_new_info, 10, 50)
-        display_info(clean_info, 10, 70)
-        display_info(clean_bigger_info, 10, 90)
-        display_info(clean_huge_info, 10, 110)
-        display_info(wall_num_info, 10, 130 )
-        display_info(instruction_info, 10, 150)   
+        for inf in info:    
+            display_info(inf, pos_x, pos_y)
+            pos_y += 20
+def display_current_instruction_info(instruction, screen, show_info):
+    if show_info:
+        info_name = "--- Current Instruction ---"
+        pos_x = screen.current_width - 200
+        pos_y = 10
+        instruction_name = instruction[NAME]
+        instruction_info = f'name : {instruction_name}'
+        instructions_num = get_instruction_amount(instruction[INFO][INST])
+        display_info(info_name, pos_x, pos_y)
+        pos_y += 20
+        display_info(instruction_info, pos_x, pos_y) 
+        for name, amount in instructions_num.items():
+            pos_y += 20
+            func_info = f'{name} : {amount}'
+            display_info(func_info, pos_x, pos_y)
 def display_info(info, x = 10, y = 10):
     font = pygame.font.Font(None, 20)
     debug_render = font.render(info,True,'White')
     debug_rect = debug_render.get_rect(topleft = (x,y))
     pygame.draw.rect(pygame.display.get_surface(), 'Black', debug_rect)
     pygame.display.get_surface().blit(debug_render, debug_rect)
-
+            
 # Helper functions
+def get_instruction_amount(info):
+    result = {}
+    for id in info:
+        func = id_func[id]
+        f_name = func.__name__
+        if f_name not in result:
+            result[f_name] = 1
+        else:
+            result[f_name] += 1
+    return result   
 def get_cells_to_change(func):
     cells_to_change = []
     for r in range(Cell.row_num):
@@ -244,3 +275,24 @@ def iterate_new(surface):
     cells_to_change = get_cells_to_change(is_trip_required)
     flip_state(cells_to_change)
     draw(surface)
+
+
+func_id = {
+    add_walls: 1,
+    clean_up: 2,
+    clean_up_bigger: 3,
+    clean_up_huge: 4,
+    randomise: 5,
+    iterate: 6,
+    iterate_new: 7,
+}
+
+id_func = {
+    1: add_walls,
+    2: clean_up,
+    3: clean_up_bigger,
+    4: clean_up_huge,
+    5: randomise,
+    6: iterate,
+    7: iterate_new,
+}

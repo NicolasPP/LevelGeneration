@@ -1,25 +1,20 @@
-from bisect import insort_right
+from ast import In
 import pygame
 from config import FULLSCREEN, DELAY
 from screen import Screen
 from cell import *
 from instruction import Instructions
-from time_wait import regular_interval_tick_wait
 
 """
 ------------- RESTRUCTURING -------------
 TODO add event parser class if game loop gets too long
-TODO intructions have to be their own class
-     move perform_instruction function to new class
-TODO Implement a queue for the instruction
-     --get rid of hardcoding instructions--
+TODO make checking for event.key == --- into a switch statement
 ------------- ------------- -------------
 ------------- MENU -------------
 TODO Make menu
 TODO Be able show key bindings
 TODO Be able to create instructions in the menu
 TODO Be able to save instructions
-TODO Be able to load instructions
 TODO Be able to delete instructions
 ------------- ---- -------------
 """
@@ -71,8 +66,9 @@ while not done:
             if event.key == pygame.K_s:
                 show_board_info = not show_board_info
                 draw(screen.surface)
-    display_current_board_information(Instructions.current_instruction, show_board_info)
+    display_current_board_information(show_board_info)
+    display_current_instruction_info(instruction_manager.get_current_instruction(), screen, show_board_info)
     pygame.display.update()
     
 
-    
+        
