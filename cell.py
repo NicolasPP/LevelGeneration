@@ -35,6 +35,13 @@ def draw(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             Cell.cell_grid[r][c].draw(surface)
+def draw_cells(cells, surface, colour = None):
+    if not colour:
+        for cell in cells:
+            cell.draw(surface)
+    else:
+        for cell in cells:
+            cell.draw(surface, colour)
 def display_current_board_information(show_info):
     info = [
         "--- Current Board Info ---",
@@ -215,9 +222,7 @@ def add_walls(surface):
             cell = Cell.cell_grid[r][c]
             if is_wall(cell):
                 cells_to_wall.append(cell)
-                
-    for cell in cells_to_wall:
-        cell.draw(surface, 'Gray')
+    draw_cells(cells_to_wall, surface, colour = 'Gray')
 def clean_up(surface):
     print("clean_up")
     Cell.clean_num += 1
@@ -229,7 +234,7 @@ def clean_up(surface):
                 cells_to_kill.append(cell)
 
     flip_state(cells_to_kill)
-    draw(surface)   
+    draw_cells(cells_to_kill, surface)
 def clean_up_bigger(surface):
     print("clean_up_bigger")
     Cell.clean_bigger_num += 1
@@ -241,7 +246,7 @@ def clean_up_bigger(surface):
                 cells_to_kill.append(cell)
 
     flip_state(cells_to_kill)
-    draw(surface)
+    draw_cells(cells_to_kill, surface)
 def clean_up_huge(surface):
     print("clean_up_huge")
     Cell.clean_huge_num += 1
@@ -253,7 +258,7 @@ def clean_up_huge(surface):
                 cells_to_kill.append(cell)
 
     flip_state(cells_to_kill)
-    draw(surface) 
+    draw_cells(cells_to_kill, surface) 
 def randomise(surface):
     print("randomise")
     reset_info()
@@ -267,13 +272,13 @@ def iterate(surface):
     Cell.iteration_num += 1
     cells_to_change = get_cells_to_change(is_change_required)
     flip_state(cells_to_change)
-    draw(surface)
+    draw_cells(cells_to_change, surface)
 def iterate_new(surface):
     print("iterate_new")
     Cell.iteration_new_num += 1
     cells_to_change = get_cells_to_change(is_trip_required)
     flip_state(cells_to_change)
-    draw(surface)
+    draw_cells(cells_to_change, surface)
 
 
 func_id = {
