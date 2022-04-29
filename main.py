@@ -3,7 +3,7 @@ import pygame
 from config import FULLSCREEN, DELAY
 from screen import Screen
 from cell import *
-from instruction import Instructions
+from instruction import Instructions_manager
 
 """
 ------------- RESTRUCTURING -------------
@@ -26,7 +26,7 @@ perform = False
 perform_index = 0
 screen = Screen(1600,900, FULLSCREEN)
 screen.display()
-instruction_manager = Instructions()
+instruction_manager = Instructions_manager()
 
 generate_cells(screen)
 draw(screen.surface)   
@@ -37,10 +37,11 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            handle_mouse_click(screen.surface)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                add_walls(screen.surface)
+                add_walls2(screen.surface)
             if event.key == pygame.K_c:
                 clean_up_bigger(screen.surface)
             if event.key == pygame.K_i:
@@ -53,7 +54,6 @@ while not done:
                 perform = not perform
                 perform_index = 0
                 instruction_manager.handle_optional_resize(screen)
-                # instruction_manager.perform(screen, show_board_info)
             if event.key == pygame.K_UP:
                 handle_cell_size_increase(5, screen)
                 generate_cells(screen)

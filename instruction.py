@@ -3,7 +3,7 @@ from cell import *
 import json
 from time_wait import regular_interval_tick_wait
 
-class Instructions:
+class Instructions_manager:
     current_instruction = ""
     def __init__(self):
         self.index = 0
@@ -18,10 +18,10 @@ class Instructions:
         with open(self.file, "r") as open_file:
             if os.stat(self.file).st_size == 0:
                 self.instructions = []
-                Instructions.current_instruction = "none"
+                Instructions_manager.current_instruction = "none"
             else:
                 self.instructions = json.load(open_file)
-                Instructions.current_instruction = self.get_current_instruction()[NAME]
+                Instructions_manager.current_instruction = self.get_current_instruction()[NAME]
 
             open_file.close()
     def get_current_instruction(self):
@@ -54,24 +54,10 @@ class Instructions:
     def increase_index(self):
         if self.index + 1 < len(self.instructions):
             self.index += 1
-            Instructions.current_instruction = self.get_current_instruction()[NAME]
+            Instructions_manager.current_instruction = self.get_current_instruction()[NAME]
 
     def decrease_index(self):
         if self.index > 0:
             self.index -= 1
-            Instructions.current_instruction = self.get_current_instruction()[NAME]
+            Instructions_manager.current_instruction = self.get_current_instruction()[NAME]
             
-
-instructions_trip = [
-    "Trip",
-    False,
-    [randomise, 1],
-    [clean_up_bigger, 7],
-    [iterate_new, 25],
-    [clean_up_bigger, 7],
-    [iterate_new, 25],
-    [clean_up_bigger, 7],
-    [iterate_new, 25],
-    [clean_up_bigger, 7],
-    [iterate_new, 25]
-]

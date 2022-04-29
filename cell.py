@@ -16,6 +16,7 @@ class Cell:
     clean_bigger_num = 0
     clean_huge_num = 0
     wall_num = 0
+    wall2_num = 0
     
     
     def __init__(self, left, top, is_edge):
@@ -28,7 +29,11 @@ class Cell:
         if not colour:
             colour =  WALL if self.state == 1 else EMPTY
         pygame.draw.rect(surface, colour, self.rect)
-         
+
+    def is_clicked(self):
+        return pygame.Rect.collidepoint(self.rect,pygame.mouse.get_pos())
+
+ 
 # Draw functions
 def draw(surface):
     surface.fill('white')  
@@ -118,7 +123,7 @@ def get_neighbours(r,c):
     if c + 1 <= column:
         neighbours.append(Cell.cell_grid[r][c + 1])
     if c - 1 >= 0:
-        neighbours.append(Cell.cell_grid[r][r - 1])
+        neighbours.append(Cell.cell_grid[r][c - 1])
     if r + 1 <= row and c -1 >= 0:
         neighbours.append(Cell.cell_grid[r+1][c-1])
     if r + 1 <= row and c + 1 <= column:
@@ -199,6 +204,7 @@ def reset_info():
     Cell.clean_bigger_num = 0
     Cell.clean_huge_num = 0
     Cell.wall_num = 0
+    Cell.wall2_num = 0
 
 def handle_cell_size_increase(change, screen):
     new_size = Cell.cell_size + change
@@ -211,8 +217,20 @@ def handle_cell_size_decrease(change):
 def handle_set_cell_size(new_size, screen):
      if new_size >= 5 and new_size <= screen.current_width // 10 and new_size <= screen.current_height:
             Cell.cell_size = new_size   
-
+def handle_mouse_click(surface):
+    for r in range(Cell.row_num):
+        for c in range(Cell.column_num):
+            cell = Cell.cell_grid[r][c]
+            if cell.is_clicked():
+                n = Cell.cell_neighbour[cell]
+                break
+    
+    draw_cells(n, surface, colour = 'Yellow')
 # Instruction commands
+'''
+when adding a new command you have to add a variable in the cell class,
+add the new fucntion id the id_func and func_id, add it to reset_info, add where it gets updated
+'''
 def add_walls(surface):
     print("add_walls")
     Cell.wall_num =+ 1
@@ -223,6 +241,25 @@ def add_walls(surface):
             if is_wall(cell):
                 cells_to_wall.append(cell)
     draw_cells(cells_to_wall, surface, colour = 'Gray')
+def add_walls2(surface):
+    Cell.wall2_num += 1
+    print("add_walls2")
+    dead_cells = []
+    cells_to_wall = []
+
+    for r in range(Cell.row_num):
+        for c in range(Cell.column_num):
+            cell = Cell.cell_grid[r][c]
+            if cell.state == 0:
+                dead_cells.append(cell)
+
+    for cell in dead_cells:
+        live_cells = list(filter(lambda cell : cell.state == 1, 
+        Cell.cell_neighbour[cell]))
+        for c in live_cells:
+            if c not in cells_to_wall:
+                cells_to_wall.append(c)
+    draw_cells(cells_to_wall, surface, 'Gray')
 def clean_up(surface):
     print("clean_up")
     Cell.clean_num += 1
@@ -289,8 +326,8 @@ func_id = {
     randomise: 5,
     iterate: 6,
     iterate_new: 7,
+    add_walls2: 8
 }
-
 id_func = {
     1: add_walls,
     2: clean_up,
@@ -299,4 +336,5 @@ id_func = {
     5: randomise,
     6: iterate,
     7: iterate_new,
+    8: add_walls2
 }
