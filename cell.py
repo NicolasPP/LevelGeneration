@@ -15,7 +15,7 @@ class Cell:
     cell_size = 20  
     iteration_num = 0
     iteration_new_num = 0
-    iteration_big_num = 0
+    island_round_num = 0
     clean_num = 0
     clean_bigger_num = 0
     clean_huge_num = 0
@@ -74,7 +74,7 @@ def display_current_board_information(show_info):
         f'total wall : {Cell.wall_num}',
         f'total wall2 :{Cell.wall2_num}',
         f'total wall3 : {Cell.wall3_num}',
-        f'total iterarions big {Cell.iteration_big_num}'
+        f'total island round {Cell.island_round_num}'
     ]
     pos_x = pos_y = 10
     if show_info:
@@ -271,7 +271,7 @@ def handle_mouse_click(surface):
                 n = Cell.cell_neighbour_20[cell]
                 break
     
-    colour_cells(n, surface, 'Yellow')
+    # colour_cells(n, surface, 'Yellow')
 def handle_func_next(func_index):
     size = len(func_id)
     next = func_index + 1
@@ -306,6 +306,7 @@ def generate_neighbour_dict(neighbour_func):
                 Cell.cell_grid[r][c]
             ] = neighbour_func(r, c)
     return result
+
 def set_state(cells, state):
     for cell in cells:
         cell.state = state
@@ -315,7 +316,7 @@ def flip_state(cells):
 def reset_info():
     Cell.iteration_num = 0
     Cell.iteration_new_num = 0
-    Cell.iteration_big_num = 0
+    Cell.island_round_num = 0
     Cell.clean_num = 0
     Cell.clean_bigger_num = 0
     Cell.clean_huge_num = 0
@@ -452,9 +453,9 @@ def iterate_new(surface):
     cells_to_change = get_cells_to_change(is_trip_required, Cell.cell_neighbour_8)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
-def iteration_big(surface):
+def island_round(surface):
     print("iterate_big")
-    Cell.iteration_big_num += 1
+    Cell.island_round_num += 1
     cells_to_change = get_cells_to_change(is_change_big, Cell.cell_neighbour_20)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
@@ -470,7 +471,7 @@ func_id = {
     add_walls2: 8,
     add_walls3: 9,
     add_walls4: 10,
-    iteration_big: 11,
+    island_round: 11,
 }
 id_func = {
     1: add_walls,
@@ -483,5 +484,5 @@ id_func = {
     8: add_walls2,
     9: add_walls3,
     10: add_walls4,
-    11: iteration_big,
+    11: island_round,
 }
