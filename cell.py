@@ -33,7 +33,6 @@ class Cell:
 
     def is_clicked(self):
         return pygame.Rect.collidepoint(self.rect,pygame.mouse.get_pos())
-
  
 # Draw functions
 def draw(surface):
@@ -48,6 +47,12 @@ def draw_cells(cells, surface, colour = None):
     else:
         for cell in cells:
             cell.draw(surface, colour)
+def display_current_command(screen, func_index):
+    func_name = id_func[func_index].__name__
+    info = f'[ {func_name} ]'
+    pos_x = (screen.current_width // 2) - 100
+    pos_y = 10
+    display_info(info, pos_x, pos_y)
 def display_current_board_information(show_info):
     info = [
         "--- Current Board Info ---",
@@ -85,7 +90,7 @@ def display_current_instruction_info(instruction, screen, show_info):
                 amount = info[1]
                 func_info = f'{name} : {amount}'
                 display_info(func_info, pos_x, pos_y)
-def display_key_binds():
+def display_key_binds(show_key_binds):
     pass
 def display_info(info, x = 10, y = 10):
     font = pygame.font.Font(None, 20)
@@ -230,6 +235,17 @@ def handle_mouse_click(surface):
                 break
     
     draw_cells(n, surface, colour = 'Yellow')
+def handle_func_next(func_index):
+    size = len(func_id)
+    next = func_index + 1
+    if next <= size:
+        return next
+    return func_index
+def handle_func_prev(func_index):
+    prev = func_index - 1
+    if prev >= 1:
+        return prev
+    return func_index
 # Instruction commands
 '''
 when adding a new command you have to add a variable in the cell class,

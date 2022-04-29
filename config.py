@@ -8,13 +8,11 @@ CELL_S = "cell_size"
 INST = "instructions"
 KEY_BINDS = {
     "f" : "full_screen",
-    "w" : "add_walls command",
-    "c" : "clean_up_bigger comand",
-    "i" : "iterate command",
-    "n" : "iterate_new command",
-    "r" : "randomise command",
+    "n" : "prev command",
+    "m" : "next command",
     "s" : "toggle show board information",
     "k" : "toggle show keybind information",
+    "SPACE" : "execute selected_command",
     "TAB" : "perform_instruction",
     "UP" : "increse size of cell",
     "DOWN" : "decrese size of cell",
