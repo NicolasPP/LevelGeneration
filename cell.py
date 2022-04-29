@@ -73,7 +73,8 @@ def display_current_board_information(show_info):
         f'total clean huge : {Cell.clean_huge_num}',
         f'total wall : {Cell.wall_num}',
         f'total wall2 :{Cell.wall2_num}',
-        f'total wall3 : {Cell.wall3_num}'
+        f'total wall3 : {Cell.wall3_num}',
+        f'total iterarions big {Cell.iteration_big_num}'
     ]
     pos_x = pos_y = 10
     if show_info:
@@ -211,10 +212,10 @@ def is_change_big(cell, cell_dict):
     count = len(list(filter(lambda cell : cell.state == State.alive.value, 
                cell_dict[cell])))
     
-    if count == 0 or count >= 100 // 8 : #wall
+    if count == 0 or count >= 12 : #wall
         return True if cell.state == State.dead.value else False
     
-    if count == 15 // 2: #empty
+    if count == 7 : #empty
         return True if cell.state == State.alive.value else False
     
     return False
