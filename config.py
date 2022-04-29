@@ -7,6 +7,7 @@ INFO = "info"
 CELL_S = "cell_size"
 INST = "instructions"
 KEY_BINDS = {
+    "f" : "full_screen",
     "w" : "add_walls command",
     "c" : "clean_up_bigger comand",
     "i" : "iterate command",

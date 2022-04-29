@@ -17,6 +17,7 @@ class Cell:
     clean_huge_num = 0
     wall_num = 0
     wall2_num = 0
+    wall3_num = 0
     
     
     def __init__(self, left, top, is_edge):
@@ -36,7 +37,7 @@ class Cell:
  
 # Draw functions
 def draw(surface):
-    surface.fill('white')  
+    surface.fill('Blue')  
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             Cell.cell_grid[r][c].draw(surface)
@@ -56,7 +57,9 @@ def display_current_board_information(show_info):
         f'total clean ups : {Cell.clean_num}',
         f'total clean bigger : {Cell.clean_bigger_num}',
         f'total clean huge : {Cell.clean_huge_num}',
-        f'total wall : {Cell.wall_num}'
+        f'total wall : {Cell.wall_num}',
+        f'total wall2 :{Cell.wall2_num}',
+        f'total wall3 : {Cell.wall3_num}'
     ]
     pos_x = pos_y = 10
     if show_info:
@@ -205,6 +208,7 @@ def reset_info():
     Cell.clean_huge_num = 0
     Cell.wall_num = 0
     Cell.wall2_num = 0
+    Cell.wall3_num = 0
 
 def handle_cell_size_increase(change, screen):
     new_size = Cell.cell_size + change
@@ -259,6 +263,24 @@ def add_walls2(surface):
         for c in live_cells:
             if c not in cells_to_wall:
                 cells_to_wall.append(c)
+    draw_cells(cells_to_wall, surface, 'Gray')
+def add_walls3(surface):
+    Cell.wall3_num += 1
+    print("add_walls3")
+    dead_cells = []
+    cells_to_wall = []
+
+    for r in range(Cell.row_num):
+        for c in range(Cell.column_num):
+            cell = Cell.cell_grid[r][c]
+            if cell.state == 0:
+                dead_cells.append(cell)
+
+    for cell in dead_cells:
+        for c in Cell.cell_neighbour[cell]:
+            if c.state == 1:
+                cells_to_wall.append(cell)
+                break
     draw_cells(cells_to_wall, surface, 'Gray')
 def clean_up(surface):
     print("clean_up")
@@ -326,7 +348,8 @@ func_id = {
     randomise: 5,
     iterate: 6,
     iterate_new: 7,
-    add_walls2: 8
+    add_walls2: 8,
+    add_walls3: 9,
 }
 id_func = {
     1: add_walls,
@@ -336,5 +359,6 @@ id_func = {
     5: randomise,
     6: iterate,
     7: iterate_new,
-    8: add_walls2
+    8: add_walls2,
+    9: add_walls3,
 }

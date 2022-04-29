@@ -40,6 +40,9 @@ while not done:
         if event.type == pygame.MOUSEBUTTONDOWN:
             handle_mouse_click(screen.surface)
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_f:
+                screen.toggle_full_screen()
+                generate_cells(screen)
             if event.key == pygame.K_w:
                 add_walls2(screen.surface)
             if event.key == pygame.K_c:
