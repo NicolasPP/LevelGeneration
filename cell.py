@@ -15,6 +15,7 @@ class Cell:
     cell_size = 20  
     iteration_num = 0
     iteration_new_num = 0
+    iteration_big_num = 0
     clean_num = 0
     clean_bigger_num = 0
     clean_huge_num = 0
@@ -206,6 +207,17 @@ def is_change_required(cell, cell_dict):
         return True if cell.state == State.alive.value else False
     
     return False
+def is_change_big(cell, cell_dict):
+    count = len(list(filter(lambda cell : cell.state == State.alive.value, 
+               cell_dict[cell])))
+    
+    if count == 0 or count >= 100 // 8 : #wall
+        return True if cell.state == State.dead.value else False
+    
+    if count == 15 // 2: #empty
+        return True if cell.state == State.alive.value else False
+    
+    return False
 def is_trip_required(cell, cell_dict):
     count = len(list(filter(lambda cell : cell.state == State.alive.value, 
                cell_dict[cell])))
@@ -267,6 +279,7 @@ def flip_state(cells):
 def reset_info():
     Cell.iteration_num = 0
     Cell.iteration_new_num = 0
+    Cell.iteration_big_num = 0
     Cell.clean_num = 0
     Cell.clean_bigger_num = 0
     Cell.clean_huge_num = 0
@@ -434,8 +447,12 @@ def iterate_new(surface):
     cells_to_change = get_cells_to_change(is_trip_required, Cell.cell_neighbour_8)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
-
-
+def iteration_big(surface):
+    print("iterate_big")
+    Cell.iteration_big_num += 1
+    cells_to_change = get_cells_to_change(is_change_big, Cell.cell_neighbour_20)
+    flip_state(cells_to_change)
+    draw_cells(cells_to_change, surface)
 func_id = {
     add_walls: 1,
     clean_up: 2,
@@ -447,6 +464,7 @@ func_id = {
     add_walls2: 8,
     add_walls3: 9,
     add_walls4: 10,
+    iteration_big: 11,
 }
 id_func = {
     1: add_walls,
@@ -459,4 +477,5 @@ id_func = {
     8: add_walls2,
     9: add_walls3,
     10: add_walls4,
+    11: iteration_big,
 }
