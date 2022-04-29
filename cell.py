@@ -293,10 +293,12 @@ def handle_cell_size_increase(change, screen):
     new_size = Cell.cell_size + change
     if new_size <= screen.current_height // 10 and new_size <= screen.current_width // 10:
         Cell.cell_size = new_size
-def handle_cell_size_decrease(change):
+    generate_cells(screen)
+def handle_cell_size_decrease(change, screen):
     new_size = Cell.cell_size - change
     if new_size > 0:
-        Cell.cell_size = new_size      
+        Cell.cell_size = new_size
+    generate_cells(screen)      
 def handle_set_cell_size(new_size, screen):
      if new_size >= 5 and new_size <= screen.current_width // 10 and new_size <= screen.current_height:
             Cell.cell_size = new_size   
