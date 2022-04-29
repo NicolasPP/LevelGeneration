@@ -12,9 +12,7 @@ TODO make checking for event.key == --- into a switch statement
 ------------- ------------- -------------
 ------------- MENU -------------
 TODO Make menu
-TODO Be able show key bindings
 TODO Be able to create instructions in the menu
-TODO Be able to save instructions
 TODO Be able to delete instructions
 ------------- ---- -------------
 """
@@ -34,7 +32,6 @@ draw(screen.surface)
 func_index = 1
         
 while not done:
-    keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
