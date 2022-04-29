@@ -1,10 +1,12 @@
 import pygame
 from config import *
 from random import randint
+from cell_state import State
 
 class Cell:
+    cell_neighbour_8 = {}
+    cell_neighbour_4 = {}
     cell_grid = []
-    cell_neighbour = {}
     row_num = 0
     column_num = 0
     
@@ -25,29 +27,30 @@ class Cell:
         self.cell_size = Cell.cell_size
         self.is_edge = is_edge
         self.rect = pygame.Rect(left, top, Cell.cell_size, Cell.cell_size)
-        self.state = 0 if is_edge else randint(0,1)
+        self.state = State.dead.value if is_edge else randint(State.dead.value, State.alive.value)
     
-    def draw(self, surface, colour = None):
-        if not colour:
-            colour =  WALL if self.state == 1 else EMPTY
+    def draw(self, surface):
+        colour = self.get_colour()
         pygame.draw.rect(surface, colour, self.rect)
 
     def is_clicked(self):
         return pygame.Rect.collidepoint(self.rect,pygame.mouse.get_pos())
- 
+    
+    def get_colour(self):
+        if self.state == State.dead.value : return DEAD
+        if self.state == State.alive.value: return ALIVE
+        if self.state == State.rock.value : return ROCK
+
 # Draw functions
 def draw(surface):
     surface.fill('Blue')  
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             Cell.cell_grid[r][c].draw(surface)
-def draw_cells(cells, surface, colour = None):
-    if not colour:
-        for cell in cells:
-            cell.draw(surface)
-    else:
-        for cell in cells:
-            cell.draw(surface, colour)
+def draw_cells(cells, surface):
+    for cell in cells:
+        cell.draw(surface)
+    
 def display_current_command(screen, func_index):
     func_name = id_func[func_index].__name__
     info = f'[ {func_name} ]'
@@ -118,12 +121,12 @@ def get_instruction_amount(info):
             result.append([id_func[id].__name__, 1])
         last = id
     return result
-def get_cells_to_change(func):
+def get_cells_to_change(func, cell_dict):
     cells_to_change = []
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if func(cell) and not cell.is_edge:
+            if func(cell, cell_dict) and not cell.is_edge:
                 cells_to_change.append(cell)
     return cells_to_change
 def get_neighbours8(r,c):
@@ -162,20 +165,20 @@ def get_neighbours4(r , c):
     if c - 1 >= 0:
         neighbours.append(Cell.cell_grid[r][c - 1]) 
     return neighbours
-def is_change_required(cell):
-    count = len(list(filter(lambda cell : cell.state == 1, 
-               Cell.cell_neighbour[cell])))
+def is_change_required(cell, cell_dict):
+    count = len(list(filter(lambda cell : cell.state == State.alive.value, 
+               cell_dict[cell])))
     
     if count == 0 or count >= 5 : #wall
-        return True if cell.state == 0 else False
+        return True if cell.state == State.dead.value else False
     
     if count == 3: #empty
-        return True if cell.state == 1 else False
+        return True if cell.state == State.alive.value else False
     
     return False
-def is_trip_required(cell):
-    count = len(list(filter(lambda cell : cell.state == 1, 
-               Cell.cell_neighbour[cell])))
+def is_trip_required(cell, cell_dict):
+    count = len(list(filter(lambda cell : cell.state == State.alive.value, 
+               cell_dict[cell])))
     
     if count == 0 or count >= 5 : #wall
         return True 
@@ -188,20 +191,20 @@ def is_edge(r, c):
     if r == 0 or c == 0 or r == Cell.row_num - 1 or c == Cell.column_num -1:
         return True
     return False
-def is_clean(cell, n_num):
-    count = len(list(filter(lambda cell : cell.state == 1, 
-               Cell.cell_neighbour[cell])))
+def is_clean(cell, n_num, cell_dict):
+    count = len(list(filter(lambda cell : cell.state == State.alive.value, 
+               cell_dict[cell])))
     
     if count <= n_num:
-        return False if cell.state == 1 else True
+        return False if cell.state == State.alive.value else True
 
     return True
-def is_wall(cell):
-    count = len(list(filter(lambda cell : cell.state == 1, 
-               Cell.cell_neighbour[cell])))
+def is_wall(cell, cell_dict):
+    count = len(list(filter(lambda cell : cell.state == State.alive.value, 
+               cell_dict[cell])))
     
     if count < 7:
-        return True if cell.state == 1 else False
+        return True if cell.state == State.alive.value else False
 
 def generate_cells(screen):
     columns = screen.current_width // Cell.cell_size
@@ -212,18 +215,24 @@ def generate_cells(screen):
                   for c in range(columns)]
                  for r in range(rows)]
     Cell.cell_grid = cell_grid
-    generate_neighbour_dict()
+    Cell.cell_neighbour_8 = generate_neighbour_dict(get_neighbours8)
+    Cell.cell_neighbour_4 = generate_neighbour_dict(get_neighbours4)
     draw(screen.surface)
-def generate_neighbour_dict():
+def generate_neighbour_dict(neighbour_func):
+    #max 8 neigbours
+    result = {}
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
-            Cell.cell_neighbour[
+            result[
                 Cell.cell_grid[r][c]
-            ] = get_neighbours8(r, c)
-
+            ] = neighbour_func(r, c)
+    return result
+def set_state(cells, state):
+    for cell in cells:
+        cell.state = state
 def flip_state(cells):
     for cell in cells:
-        cell.state = 0 if cell.state == 1 else 1
+        cell.state = State.dead.value if cell.state == State.alive.value else State.alive.value
 def reset_info():
     Cell.iteration_num = 0
     Cell.iteration_new_num = 0
@@ -251,10 +260,10 @@ def handle_mouse_click(surface):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
             if cell.is_clicked():
-                n = Cell.cell_neighbour[cell]
+                n = Cell.cell_neighbour_8[cell]
                 break
     
-    draw_cells(n, surface, colour = 'Yellow')
+    draw_cells(n, surface)
 def handle_func_next(func_index):
     size = len(func_id)
     next = func_index + 1
@@ -278,9 +287,10 @@ def add_walls(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if is_wall(cell):
+            if is_wall(cell, Cell.cell_neighbour_8):
                 cells_to_wall.append(cell)
-    draw_cells(cells_to_wall, surface, colour = 'Gray')
+    set_state(cells_to_wall, State.rock.value)
+    draw_cells(cells_to_wall, surface)
 def add_walls2(surface):
     Cell.wall2_num += 1
     print("add_walls2")
@@ -290,16 +300,17 @@ def add_walls2(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if cell.state == 0:
+            if cell.state == State.dead.value:
                 dead_cells.append(cell)
 
     for cell in dead_cells:
-        live_cells = list(filter(lambda cell : cell.state == 1, 
-        Cell.cell_neighbour[cell]))
+        live_cells = list(filter(lambda cell : cell.state == State.alive.value, 
+        Cell.cell_neighbour_8[cell]))
         for c in live_cells:
             if c not in cells_to_wall:
                 cells_to_wall.append(c)
-    draw_cells(cells_to_wall, surface, 'Gray')
+    set_state(cells_to_wall, State.rock.value)
+    draw_cells(cells_to_wall, surface)
 def add_walls3(surface):
     Cell.wall3_num += 1
     print("add_walls3")
@@ -309,15 +320,16 @@ def add_walls3(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if cell.state == 0:
+            if cell.state == State.dead.value:
                 dead_cells.append(cell)
 
     for cell in dead_cells:
-        for c in Cell.cell_neighbour[cell]:
-            if c.state == 1:
+        for c in Cell.cell_neighbour_8[cell]:
+            if c.state == State.alive.value:
                 cells_to_wall.append(cell)
                 break
-    draw_cells(cells_to_wall, surface, 'Gray')
+    set_state(cells_to_wall, State.rock.value)
+    draw_cells(cells_to_wall, surface)
 def add_walls4(surface):
     Cell.wall3_num += 1
     print("add_walls4")
@@ -327,14 +339,15 @@ def add_walls4(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if cell.state == 0:
-                dead_cells.append([cell, r, c])
+            if cell.state == State.dead.value:
+                dead_cells.append(cell)
 
-    for cell_index in dead_cells:
-        for cell in get_neighbours4(cell_index[1], cell_index[2]):
-            if cell.state == 1:
-                cells_to_wall.append(cell)
-    draw_cells(cells_to_wall, surface, 'Gray')
+    for cell in dead_cells:
+        for c in Cell.cell_neighbour_4[cell]:
+            if c.state == State.alive.value:
+                cells_to_wall.append(c)
+    set_state(cells_to_wall, State.rock.value)
+    draw_cells(cells_to_wall, surface)
 def clean_up(surface):
     print("clean_up")
     Cell.clean_num += 1
@@ -342,10 +355,9 @@ def clean_up(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if not is_clean(cell, 1):
+            if not is_clean(cell, 1, Cell.cell_neighbour_8):
                 cells_to_kill.append(cell)
-
-    flip_state(cells_to_kill)
+    set_state(cells_to_kill, State.dead.value)
     draw_cells(cells_to_kill, surface)
 def clean_up_bigger(surface):
     print("clean_up_bigger")
@@ -354,10 +366,10 @@ def clean_up_bigger(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if not is_clean(cell, 3):
+            if not is_clean(cell, 3, Cell.cell_neighbour_8):
                 cells_to_kill.append(cell)
 
-    flip_state(cells_to_kill)
+    set_state(cells_to_kill, State.dead.value)
     draw_cells(cells_to_kill, surface)
 def clean_up_huge(surface):
     print("clean_up_huge")
@@ -366,10 +378,10 @@ def clean_up_huge(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            if not is_clean(cell, 4):
+            if not is_clean(cell, 4, Cell.cell_neighbour_8):
                 cells_to_kill.append(cell)
 
-    flip_state(cells_to_kill)
+    set_state(cells_to_kill, State.dead.value)
     draw_cells(cells_to_kill, surface) 
 def randomise(surface):
     print("randomise")
@@ -377,18 +389,18 @@ def randomise(surface):
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            cell.state = 0 if cell.is_edge else randint(0,1)
+            cell.state = State.dead.value if cell.is_edge else randint(State.dead.value, State.alive.value)
     draw(surface)
 def iterate(surface):
     print("iterate")
     Cell.iteration_num += 1
-    cells_to_change = get_cells_to_change(is_change_required)
+    cells_to_change = get_cells_to_change(is_change_required, Cell.cell_neighbour_8)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
 def iterate_new(surface):
     print("iterate_new")
     Cell.iteration_new_num += 1
-    cells_to_change = get_cells_to_change(is_trip_required)
+    cells_to_change = get_cells_to_change(is_trip_required, Cell.cell_neighbour_8)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
 

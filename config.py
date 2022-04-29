@@ -1,5 +1,6 @@
-WALL = 'Green'
-EMPTY = 'Blue'
+ALIVE = 'Green'
+DEAD = 'Blue'
+ROCK = 'Gray'
 FULLSCREEN = False
 DELAY = 60
 NAME = "name"
