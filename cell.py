@@ -30,8 +30,9 @@ class Cell:
         self.rect = pygame.Rect(left, top, Cell.cell_size, Cell.cell_size)
         self.state = State.dead.value if is_edge else randint(State.dead.value, State.alive.value)
     
-    def draw(self, surface):
-        colour = self.get_colour()
+    def draw(self, surface, colour = False):
+        if not colour:
+            colour = self.get_colour()
         pygame.draw.rect(surface, colour, self.rect)
 
     def is_clicked(self):
@@ -51,6 +52,9 @@ def draw(surface):
 def draw_cells(cells, surface):
     for cell in cells:
         cell.draw(surface)
+def colour_cells(cells, surface, colour):
+    for cell in cells:
+        cell.draw(surface, colour)
 def display_current_command(screen, func_index):
     func_name = id_func[func_index].__name__
     info = f'[ {func_name} ]'
@@ -287,10 +291,10 @@ def handle_mouse_click(surface):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
             if cell.is_clicked():
-                n = Cell.cell_neighbour_8[cell]
+                n = Cell.cell_neighbour_20[cell]
                 break
     
-    draw_cells(n, surface)
+    colour_cells(n, surface, 'Yellow')
 def handle_func_next(func_index):
     size = len(func_id)
     next = func_index + 1
