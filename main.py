@@ -72,10 +72,10 @@ def handle_perform(screen):
 
 while not done:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: done = True
+        if event.type == pygame.QUIT: not done
         if event.type == pygame.MOUSEBUTTONDOWN: handle_mouse_click(screen.surface)
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE: done = True
+            if event.key == pygame.K_ESCAPE: not done
             if event.key == pygame.K_SPACE: id_func[func_index](screen.surface)
             if event.key == pygame.K_UP: handle_cell_size_increase(5, screen)
             if event.key == pygame.K_DOWN: handle_cell_size_decrease(5, screen)
