@@ -48,6 +48,15 @@
     }
   },
   {
+    "name": "very nice 15",
+    "info": {
+      "cell_size": 15,
+      "instructions": [
+        5, 2, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 10
+      ]
+    }
+  },
+  {
     "name": "Trip",
     "info": {
       "cell_size": false,

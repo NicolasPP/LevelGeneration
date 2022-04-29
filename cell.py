@@ -18,6 +18,7 @@ class Cell:
     wall_num = 0
     wall2_num = 0
     wall3_num = 0
+    wall4_num = 0
     
     
     def __init__(self, left, top, is_edge):
@@ -90,8 +91,14 @@ def display_current_instruction_info(instruction, screen, show_info):
                 amount = info[1]
                 func_info = f'{name} : {amount}'
                 display_info(func_info, pos_x, pos_y)
-def display_key_binds(show_key_binds):
-    pass
+def display_key_binds(show_key_binds, screen):
+    if show_key_binds:
+        pos_x = (screen.current_width // 2) - 100
+        pos_y = 30
+        for key, purpose in KEY_BINDS.items():
+            info = f'{key} : {purpose}'
+            display_info(info, pos_x, pos_y)
+            pos_y += 20
 def display_info(info, x = 10, y = 10):
     font = pygame.font.Font(None, 20)
     debug_render = font.render(info,True,'White')
@@ -119,7 +126,7 @@ def get_cells_to_change(func):
             if func(cell) and not cell.is_edge:
                 cells_to_change.append(cell)
     return cells_to_change
-def get_neighbours(r,c):
+def get_neighbours8(r,c):
     row = Cell.row_num - 1
     column = Cell.column_num - 1
     neighbours = []
@@ -142,7 +149,19 @@ def get_neighbours(r,c):
         neighbours.append(Cell.cell_grid[r-1][c-1])
         
     return neighbours
-          
+def get_neighbours4(r , c):
+    row = Cell.row_num - 1
+    column = Cell.column_num - 1
+    neighbours = []
+    if r + 1 <= row:
+        neighbours.append(Cell.cell_grid[r + 1][c])
+    if r - 1 >= 0:
+        neighbours.append(Cell.cell_grid[r-1][c])
+    if c + 1 <= column:
+        neighbours.append(Cell.cell_grid[r][c + 1])
+    if c - 1 >= 0:
+        neighbours.append(Cell.cell_grid[r][c - 1]) 
+    return neighbours
 def is_change_required(cell):
     count = len(list(filter(lambda cell : cell.state == 1, 
                Cell.cell_neighbour[cell])))
@@ -200,7 +219,7 @@ def generate_neighbour_dict():
         for c in range(Cell.column_num):
             Cell.cell_neighbour[
                 Cell.cell_grid[r][c]
-            ] = get_neighbours(r, c)
+            ] = get_neighbours8(r, c)
 
 def flip_state(cells):
     for cell in cells:
@@ -214,6 +233,7 @@ def reset_info():
     Cell.wall_num = 0
     Cell.wall2_num = 0
     Cell.wall3_num = 0
+    Cell.wall4_num = 0
 
 def handle_cell_size_increase(change, screen):
     new_size = Cell.cell_size + change
@@ -298,6 +318,23 @@ def add_walls3(surface):
                 cells_to_wall.append(cell)
                 break
     draw_cells(cells_to_wall, surface, 'Gray')
+def add_walls4(surface):
+    Cell.wall3_num += 1
+    print("add_walls4")
+    dead_cells = []
+    cells_to_wall = []
+
+    for r in range(Cell.row_num):
+        for c in range(Cell.column_num):
+            cell = Cell.cell_grid[r][c]
+            if cell.state == 0:
+                dead_cells.append([cell, r, c])
+
+    for cell_index in dead_cells:
+        for cell in get_neighbours4(cell_index[1], cell_index[2]):
+            if cell.state == 1:
+                cells_to_wall.append(cell)
+    draw_cells(cells_to_wall, surface, 'Gray')
 def clean_up(surface):
     print("clean_up")
     Cell.clean_num += 1
@@ -366,6 +403,7 @@ func_id = {
     iterate_new: 7,
     add_walls2: 8,
     add_walls3: 9,
+    add_walls4: 10,
 }
 id_func = {
     1: add_walls,
@@ -377,4 +415,5 @@ id_func = {
     7: iterate_new,
     8: add_walls2,
     9: add_walls3,
+    10: add_walls4,
 }

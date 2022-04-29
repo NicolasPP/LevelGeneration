@@ -57,6 +57,12 @@ while not done:
                 perform = not perform
                 perform_index = 0
                 instruction_manager.handle_optional_resize(screen)
+            if event.key == pygame.K_s:
+                show_board_info = not show_board_info
+                draw(screen.surface)
+            if event.key == pygame.K_k:
+                show_key_binds = not show_key_binds
+                draw(screen.surface)
             if event.key == pygame.K_UP:
                 handle_cell_size_increase(5, screen)
                 generate_cells(screen)
@@ -69,12 +75,7 @@ while not done:
             if event.key == pygame.K_RIGHT:
                 instruction_manager.increase_index()
                 draw(screen.surface)
-            if event.key == pygame.K_s:
-                show_board_info = not show_board_info
-                draw(screen.surface)
-            if event.key == pygame.K_k:
-                show_key_binds = not show_key_binds
-                draw(screen.surface)
+
     if perform:
         if regular_interval_tick_wait(DELAY):
             perform = instruction_manager.perform(perform_index, screen)
@@ -82,7 +83,7 @@ while not done:
             
     display_current_board_information(show_board_info)
     display_current_instruction_info(instruction_manager.get_current_instruction(), screen, show_board_info)
-    display_key_binds(show_key_binds)
+    display_key_binds(show_key_binds, screen)
     display_current_command(screen, func_index)
     pygame.display.update()
     
