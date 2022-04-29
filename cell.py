@@ -4,6 +4,7 @@ from random import randint
 from cell_state import State
 
 class Cell:
+    cell_neighbour_20 = {}
     cell_neighbour_8 = {}
     cell_neighbour_4 = {}
     cell_grid = []
@@ -50,7 +51,6 @@ def draw(surface):
 def draw_cells(cells, surface):
     for cell in cells:
         cell.draw(surface)
-    
 def display_current_command(screen, func_index):
     func_name = id_func[func_index].__name__
     info = f'[ {func_name} ]'
@@ -129,19 +129,45 @@ def get_cells_to_change(func, cell_dict):
             if func(cell, cell_dict) and not cell.is_edge:
                 cells_to_change.append(cell)
     return cells_to_change
+def get_neighbours20(r, c):
+    row = Cell.row_num - 1
+    column = Cell.column_num -1
+    neighbours = get_neighbours8()
+
+    # top
+    pos_x = c - 1
+    pos_y = r - 2
+    if pos_y >= 0:
+        for i in range(3):
+            if pos_x + i >= 0 and pos_x + i <= column:
+                neighbours.append(Cell.cell_grid[pos_y][pos_x + i])
+    # bottom
+    pos_x = c + 1
+    pos_y = r + 2
+    if pos_y <= row:
+        for i in range(3):
+            if pos_x - i>= 0 and pos_x- i<= column:
+                neighbours.append(Cell.cell_grid[pos_y][pos_x - i])
+    #left
+    pos_x = c - 2
+    pos_y = r - 1
+    if pos_x >= 0:
+        for i in range(3):
+            if pos_y + i >= 0 and pos_y + i <= row:
+                neighbours.append(Cell.cell_grid[pos_y + i][pos_x])
+    #right
+    pos_x = c + 2
+    pos_y = r + 1
+    if pos_x <= row:
+        for i in range(3):
+            if pos_y - i >= 0 and pos_y - i <= row:
+                neighbours.append(Cell.cell_grid[pos_y - i][pos_x])
+    
+    return neighbours
 def get_neighbours8(r,c):
     row = Cell.row_num - 1
     column = Cell.column_num - 1
-    neighbours = []
-    
-    if r + 1 <= row:
-        neighbours.append(Cell.cell_grid[r + 1][c])
-    if r - 1 >= 0:
-        neighbours.append(Cell.cell_grid[r-1][c])
-    if c + 1 <= column:
-        neighbours.append(Cell.cell_grid[r][c + 1])
-    if c - 1 >= 0:
-        neighbours.append(Cell.cell_grid[r][c - 1])
+    neighbours = get_neighbours4(r, c)
     if r + 1 <= row and c -1 >= 0:
         neighbours.append(Cell.cell_grid[r+1][c-1])
     if r + 1 <= row and c + 1 <= column:
@@ -152,7 +178,7 @@ def get_neighbours8(r,c):
         neighbours.append(Cell.cell_grid[r-1][c-1])
         
     return neighbours
-def get_neighbours4(r , c):
+def get_neighbours4(r,c):
     row = Cell.row_num - 1
     column = Cell.column_num - 1
     neighbours = []
@@ -217,6 +243,7 @@ def generate_cells(screen):
     Cell.cell_grid = cell_grid
     Cell.cell_neighbour_8 = generate_neighbour_dict(get_neighbours8)
     Cell.cell_neighbour_4 = generate_neighbour_dict(get_neighbours4)
+    Cell.cell_neighbour_20 = generate_neighbour_dict(get_neighbours20)
     draw(screen.surface)
 def generate_neighbour_dict(neighbour_func):
     #max 8 neigbours
