@@ -136,7 +136,7 @@ def get_cells_to_change(func, cell_dict):
 def get_neighbours20(r, c):
     row = Cell.row_num - 1
     column = Cell.column_num -1
-    neighbours = get_neighbours8()
+    neighbours = get_neighbours8(r, c)
 
     # top
     pos_x = c - 1
@@ -162,7 +162,7 @@ def get_neighbours20(r, c):
     #right
     pos_x = c + 2
     pos_y = r + 1
-    if pos_x <= row:
+    if pos_x <= column:
         for i in range(3):
             if pos_y - i >= 0 and pos_y - i <= row:
                 neighbours.append(Cell.cell_grid[pos_y - i][pos_x])
