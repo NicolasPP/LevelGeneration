@@ -197,6 +197,7 @@ def get_neighbours4(r,c):
     if c - 1 >= 0:
         neighbours.append(Cell.cell_grid[r][c - 1]) 
     return neighbours
+
 def is_change_required(cell, cell_dict):
     count = len(list(filter(lambda cell : cell.state == State.alive.value, 
                cell_dict[cell])))
@@ -249,6 +250,40 @@ def is_wall(cell, cell_dict):
     if count < 7:
         return True if cell.state == State.alive.value else False
 
+def handle_cell_size_increase(change, screen):
+    new_size = Cell.cell_size + change
+    if new_size <= screen.current_height // 10 and new_size <= screen.current_width // 10:
+        Cell.cell_size = new_size
+    generate_cells(screen)
+def handle_cell_size_decrease(change, screen):
+    new_size = Cell.cell_size - change
+    if new_size > 0:
+        Cell.cell_size = new_size
+    generate_cells(screen)      
+def handle_set_cell_size(new_size, screen):
+     if new_size >= 5 and new_size <= screen.current_width // 10 and new_size <= screen.current_height:
+            Cell.cell_size = new_size   
+def handle_mouse_click(surface):
+    for r in range(Cell.row_num):
+        for c in range(Cell.column_num):
+            cell = Cell.cell_grid[r][c]
+            if cell.is_clicked():
+                n = Cell.cell_neighbour_20[cell]
+                break
+    
+    colour_cells(n, surface, 'Yellow')
+def handle_func_next(func_index):
+    size = len(func_id)
+    next = func_index + 1
+    if next <= size:
+        return next
+    return func_index
+def handle_func_prev(func_index):
+    prev = func_index - 1
+    if prev >= 1:
+        return prev
+    return func_index
+
 def generate_cells(screen):
     columns = screen.current_width // Cell.cell_size
     rows = screen.current_height // Cell.cell_size
@@ -289,40 +324,7 @@ def reset_info():
     Cell.wall3_num = 0
     Cell.wall4_num = 0
 
-def handle_cell_size_increase(change, screen):
-    new_size = Cell.cell_size + change
-    if new_size <= screen.current_height // 10 and new_size <= screen.current_width // 10:
-        Cell.cell_size = new_size
-    generate_cells(screen)
-def handle_cell_size_decrease(change, screen):
-    new_size = Cell.cell_size - change
-    if new_size > 0:
-        Cell.cell_size = new_size
-    generate_cells(screen)      
-def handle_set_cell_size(new_size, screen):
-     if new_size >= 5 and new_size <= screen.current_width // 10 and new_size <= screen.current_height:
-            Cell.cell_size = new_size   
-def handle_mouse_click(surface):
-    for r in range(Cell.row_num):
-        for c in range(Cell.column_num):
-            cell = Cell.cell_grid[r][c]
-            if cell.is_clicked():
-                n = Cell.cell_neighbour_20[cell]
-                break
-    
-    colour_cells(n, surface, 'Yellow')
-def handle_func_next(func_index):
-    size = len(func_id)
-    next = func_index + 1
-    if next <= size:
-        return next
-    return func_index
-def handle_func_prev(func_index):
-    prev = func_index - 1
-    if prev >= 1:
-        return prev
-    return func_index
-# Instruction commands
+#   Instruction commands
 '''
 when adding a new command you have to add a variable in the cell class,
 add the new fucntion id the id_func and func_id, add it to reset_info, add where it gets updated
@@ -456,6 +458,7 @@ def iteration_big(surface):
     cells_to_change = get_cells_to_change(is_change_big, Cell.cell_neighbour_20)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
+
 func_id = {
     add_walls: 1,
     clean_up: 2,
