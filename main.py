@@ -68,7 +68,11 @@ def handle_perform(screen):
         if regular_interval_tick_wait(DELAY):
             perform = manager.perform(perform_index, screen)
             perform_index += 1
-
+def display_GUI_info():
+    display_current_board_information(show_board_info and not record_instruction)
+    display_current_instruction_info(manager.get_current_instruction(), screen, show_board_info)
+    display_key_binds(show_key_binds, screen)
+    display_current_command(screen, func_index)
 
 while not done:
     for event in pygame.event.get():
@@ -90,9 +94,6 @@ while not done:
             if event.key == pygame.K_TAB and not perform: toggle_perform(screen)
     
     handle_perform(screen)
-    display_current_board_information(show_board_info and not record_instruction)
-    display_current_instruction_info(manager.get_current_instruction(), screen, show_board_info)
-    display_key_binds(show_key_binds, screen)
-    display_current_command(screen, func_index)
+    display_GUI_info()
     pygame.display.update()
 pygame.quit()
