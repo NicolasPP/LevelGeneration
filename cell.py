@@ -1,4 +1,5 @@
 import pygame
+import sys as sys
 from config import *
 from random import randint
 from cell_state import State
@@ -198,6 +199,14 @@ def get_neighbours4(r,c):
         neighbours.append(Cell.cell_grid[r][c - 1]) 
     return neighbours
 
+def connected_components_dfs(temp, cell, visited, cell_neighbour):
+    visited[cell] = True
+    temp.append(cell)
+    for c in cell_neighbour[cell]:
+        if not visited[c] and c.state == 1:
+            temp = connected_components_dfs(temp, c, visited, cell_neighbour)
+    return temp
+    
 def is_change_required(cell, cell_dict):
     count = len(list(filter(lambda cell : cell.state == State.alive.value, 
                cell_dict[cell])))
@@ -305,6 +314,11 @@ def generate_neighbour_dict(neighbour_func):
             result[
                 Cell.cell_grid[r][c]
             ] = neighbour_func(r, c)
+    return result
+def generate_visited_dict(cell_neighbour):
+    result = {}
+    for key in cell_neighbour:
+        result[key] = False
     return result
 
 def set_state(cells, state):
@@ -459,6 +473,23 @@ def island_round(surface):
     cells_to_change = get_cells_to_change(is_change_big, Cell.cell_neighbour_20)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
+def find_island_dfs(surface):
+    visited = generate_visited_dict(Cell.cell_neighbour_8)
+    if len(visited) > 10000:
+        sys.setrecursionlimit(50000)
+
+    connected_cells = []
+    
+    for cell in Cell.cell_neighbour_8:
+        if not visited[cell] and cell.state == 1:
+            temp = []
+            connected_cells.append(connected_components_dfs(temp, cell, visited, Cell.cell_neighbour_8))
+   
+    print(len(connected_cells))
+    for cell_list in connected_cells:
+        for cell in cell_list:
+            cell.draw(surface, 'Pink')
+
 
 func_id = {
     add_walls: 1,
@@ -472,6 +503,7 @@ func_id = {
     add_walls3: 9,
     add_walls4: 10,
     island_round: 11,
+    find_island_dfs: 12,
 }
 id_func = {
     1: add_walls,
@@ -485,4 +517,5 @@ id_func = {
     9: add_walls3,
     10: add_walls4,
     11: island_round,
+    12: find_island_dfs,
 }
