@@ -1,6 +1,8 @@
 ALIVE = 'Green'
 DEAD = 'Blue'
 ROCK = 'Gray'
+LAKE = 'Lightblue'
+PATH = 'Brown'
 FULLSCREEN = False
 DELAY = 60
 NAME = "name"
