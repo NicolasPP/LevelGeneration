@@ -1,10 +1,13 @@
 import pygame
 import sys as sys
+import queue
+from collections import deque
 from config import *
-from random import randint
+from random import randint, choice
 from cell_state import State
 
 class Cell:
+    islands = []
     cell_neighbour_20 = {}
     cell_neighbour_8 = {}
     cell_neighbour_4 = {}
@@ -42,8 +45,10 @@ class Cell:
     
     def get_colour(self):
         if self.state == State.dead.value : return DEAD
-        if self.state == State.alive.value: return ALIVE
+        if self.state == State.alive.value : return ALIVE
         if self.state == State.rock.value : return ROCK
+        if self.state == State.lake.value : return LAKE
+        if self.state == State.path.value : return PATH
 
 # Draw functions
 def draw(surface):
@@ -199,14 +204,33 @@ def get_neighbours4(r,c):
         neighbours.append(Cell.cell_grid[r][c - 1]) 
     return neighbours
 
-def connected_components_dfs(temp, cell, visited, cell_neighbour):
+def cc_while_dfs(cell, visited, cell_neighbour):
+    stack = deque()
+    stack.append(cell)
+    island = [cell]
+    while len(stack):
+        c = stack.pop()
+        if not visited[c]:
+            visited[c] = True
+        for n in cell_neighbour[c]:
+            if not visited[n]:
+                stack.append(n)
+                island.append(n)
+    return island
+def all_distances_from_cell(cell, visited, distance, cell_neighbour):
+    q = queue.Queue()
+    q.put(cell)
     visited[cell] = True
-    temp.append(cell)
-    for c in cell_neighbour[cell]:
-        if not visited[c] and c.state == 1:
-            temp = connected_components_dfs(temp, c, visited, cell_neighbour)
-    return temp
-    
+    distance[cell].append(cell)
+    while not q.empty():
+        a = q.get()
+       
+        for c in cell_neighbour[a]:
+            if c.state == State.alive.value and not visited[c]:
+                distance[c] = distance[a] + [c]
+                visited[c] = True
+                q.put(c)
+
 def is_change_required(cell, cell_dict):
     count = len(list(filter(lambda cell : cell.state == State.alive.value, 
                cell_dict[cell])))
@@ -281,17 +305,7 @@ def handle_mouse_click(surface):
                 break
     
     # colour_cells(n, surface, 'Yellow')
-def handle_func_next(func_index):
-    size = len(func_id)
-    next = func_index + 1
-    if next <= size:
-        return next
-    return func_index
-def handle_func_prev(func_index):
-    prev = func_index - 1
-    if prev >= 1:
-        return prev
-    return func_index
+
 
 def generate_cells(screen):
     columns = screen.current_width // Cell.cell_size
@@ -316,9 +330,13 @@ def generate_neighbour_dict(neighbour_func):
             ] = neighbour_func(r, c)
     return result
 def generate_visited_dict(cell_neighbour):
+    # this will consider every state other than dead alive
     result = {}
-    for key in cell_neighbour:
-        result[key] = False
+    for cell in cell_neighbour:
+        if cell.state == State.dead.value:
+            result[cell] = True
+        else:
+            result[cell] = False
     return result
 
 def set_state(cells, state):
@@ -473,22 +491,78 @@ def island_round(surface):
     cells_to_change = get_cells_to_change(is_change_big, Cell.cell_neighbour_20)
     flip_state(cells_to_change)
     draw_cells(cells_to_change, surface)
-def find_island_dfs(surface):
+def create_main_islands(surface):
+    print("find_island_dfs")
     visited = generate_visited_dict(Cell.cell_neighbour_8)
-    if len(visited) > 10000:
-        sys.setrecursionlimit(50000)
-
-    connected_cells = []
-    
+    islands = []
     for cell in Cell.cell_neighbour_8:
-        if not visited[cell] and cell.state == 1:
-            temp = []
-            connected_cells.append(connected_components_dfs(temp, cell, visited, Cell.cell_neighbour_8))
-   
-    print(len(connected_cells))
-    for cell_list in connected_cells:
-        for cell in cell_list:
-            cell.draw(surface, 'Pink')
+        if not visited[cell]:
+            island = cc_while_dfs(cell, visited, Cell.cell_neighbour_8)
+            islands.append(island)
+
+    islands.sort(key = len)
+    
+    main = [
+    islands.pop(),
+    islands.pop(),
+    islands.pop(),
+    ]
+
+    Cell.islands = main
+
+    for island in islands:
+        for cell in island:
+            cell.state = State.dead.value
+
+    draw(surface)
+def find_lakes(surface):
+    print("bad lind lakes")
+    # create visited
+    visited = {}
+    islands = []
+    for cell in Cell.cell_neighbour_8:
+        if cell not in visited:
+            if cell.state == State.dead.value:
+                visited[cell] = False
+            else:
+                visited[cell] = True
+
+    for cell in Cell.cell_neighbour_8:
+        if not visited[cell]:
+            island = cc_while_dfs(cell, visited, Cell.cell_neighbour_8)
+            islands.append(island)
+
+    islands.sort(key = len)
+    islands.pop() ## assuming the biggest dead cell island is the sea
+                  ## only works when the biggest dead island is the one surrounding the live islands
+    for island in islands: 
+        set_state(island, State.lake.value)
+
+    draw(surface)
+def create_longest_path(surface):
+    for island in Cell.islands:
+        start = choice(island)
+        visited = {}
+        distance = {}
+        for cell in island:
+            visited[cell] = False
+            distance[cell] = []
+        all_distances_from_cell(start, visited, distance, Cell.cell_neighbour_8)
+    
+        dist = 0
+        end = start
+        path = [start]
+    
+        for cell, distance in distance.items():
+            if dist < len(distance):
+                dist = len(distance)
+                path = distance
+                end = cell
+    
+        set_state(path, State.path.value)
+        draw(surface)
+
+
 
 
 func_id = {
@@ -503,7 +577,9 @@ func_id = {
     add_walls3: 9,
     add_walls4: 10,
     island_round: 11,
-    find_island_dfs: 12,
+    create_main_islands: 12,
+    find_lakes: 13,
+    create_longest_path: 14,
 }
 id_func = {
     1: add_walls,
@@ -517,5 +593,7 @@ id_func = {
     9: add_walls3,
     10: add_walls4,
     11: island_round,
-    12: find_island_dfs,
+    12: create_main_islands,
+    13: find_lakes,
+    14: create_longest_path,
 }
