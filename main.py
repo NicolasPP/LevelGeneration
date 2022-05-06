@@ -68,6 +68,17 @@ def handle_perform(screen):
         if regular_interval_tick_wait(DELAY):
             perform = manager.perform(perform_index, screen)
             perform_index += 1
+def handle_func_next(func_index):
+    size = len(func_id)
+    next = func_index + 1
+    if next <= size:
+        return next
+    return func_index
+def handle_func_prev(func_index):
+    prev = func_index - 1
+    if prev >= 1:
+        return prev
+    return func_index
 def display_GUI_info():
     display_current_board_information(show_board_info and not record_instruction)
     display_current_instruction_info(manager.get_current_instruction(), screen, show_board_info)
@@ -95,5 +106,5 @@ while not done:
     
     handle_perform(screen)
     display_GUI_info()
-    pygame.display.update()
+    pygame.display.flip()
 pygame.quit()
