@@ -32,8 +32,10 @@ class Screen:
 
     def display(self):
         pygame.init()
+        self.transparent_surface = pygame.Surface((self.current_width, self.current_height))
+        self.transparent_surface.set_alpha(127)
         self.surface = pygame.display.set_mode((self.current_width, self.current_height))
-        
+
     
     def toggle_full_screen(self):
         pygame.display.quit()
