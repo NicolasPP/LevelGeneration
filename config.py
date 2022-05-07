@@ -14,6 +14,7 @@ KEY_BINDS = {
     "s" : "toggle show board information",
     "k" : "toggle show keybind information",
     "n" : "start recording new Instruction",
+    "m" : "show territories",
     "ESCAPE" : "quit",
     "COMMA" : "prev command",
     "PERIOD" : "next command",
