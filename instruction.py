@@ -39,23 +39,22 @@ class Instructions_manager:
         if optional_size_change != False: 
             handle_set_cell_size(self.current_instruction[INFO][CELL_S], screen)
             generate_cells(screen)
-            draw(screen.surface)
-    def increase_index(self, surface):
+    def increase_index(self):
         if self.index + 1 < len(self.instructions):
             self.index += 1
             Instructions_manager.current_instruction = self.get_current_instruction()[NAME]
-            draw(surface)
-    def decrease_index(self, surface):
+            Cell.draw_all()
+    def decrease_index(self):
         if self.index > 0:
             self.index -= 1
             Instructions_manager.current_instruction = self.get_current_instruction()[NAME]
-            draw(surface)
+            Cell.draw_all()
 
     #execution
     def perform(self, index, screen):
         ids = self.current_instruction[INFO][INST]
         current_func_id = ids[index]
-        id_func[current_func_id](screen.surface)
+        id_func[current_func_id](screen)
         if index == len(ids) -1:
             return False
         return True
