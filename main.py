@@ -42,7 +42,7 @@ Cell.draw_all()
 def toggle_show_territories():
     global show_territories
     show_territories = not show_territories
-    # draw()
+    Cell.draw_all()
 def toggle_perform():
     global perform, perform_index
     perform = not perform
