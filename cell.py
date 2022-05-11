@@ -5,7 +5,7 @@ from collections import deque
 from config import *
 from random import randint, choice
 from cell_state import State
-
+from utils import time_func
 class Cell:
     islands = []
     cell_neighbour_20 = {}
@@ -38,6 +38,7 @@ class Cell:
         self.rect = pygame.Rect(left, top, Cell.cell_size, Cell.cell_size)
         self._state = State.dead.value if is_edge else randint(State.dead.value, State.alive.value)
         self.territory = None
+        self.alpha_surface = pygame.Surface(self.rect.size)
 
     @property
     def state(self):
@@ -51,6 +52,11 @@ class Cell:
     @state.deleter
     def state(self):
         del self._state 
+
+    def draw_alpha(self, colour, alpha):
+        self.alpha_surface.set_alpha(alpha)
+        self.alpha_surface.fill(colour)
+        Cell.screen.surface.blit(self.alpha_surface, self.rect)
 
     def draw(self, colour = False):
         if not colour:
@@ -139,24 +145,25 @@ def display_info(info, x = 10, y = 10):
     pygame.display.get_surface().blit(debug_render, debug_rect)
 def display_territories(screen, show_territories):
     if show_territories:
-        # screen.transparent_surface.fill("white")
-        # for r in range(Cell.row_num):
-        #     for c in range(Cell.column_num):
-        #         cell = Cell.cell_grid[r][c]
-        #         if cell.state == State.alive.value:
-        #             if cell.left < screen.current_width // 2:
+        for r in range(Cell.row_num):
+            for c in range(Cell.column_num):
+                cell = Cell.cell_grid[r][c]
+                if cell.state == State.alive.value:
+                    
+                    if cell.left < screen.current_width // 2:
+                        cell.draw_alpha('red', 5)
         #                 cell.draw(screen.transparent_surface, 'Pink')
-        #             else:
+                    else:
+                        cell.draw_alpha('pink', 5)
         #                 cell.draw(screen.transparent_surface, 'red')
-        draw_rect_alpha(screen.surface, (0,0,0), (100,100,100,100))
+        # draw_rect_alpha(screen.surface, (0,0,0), (100,100,100,100))
         # screen.surface.blit(screen.transparent_surface, (0, 0))
+    else:
+         for r in range(Cell.row_num):
+            for c in range(Cell.column_num):
+                cell = Cell.cell_grid[r][c]
+                cell.alpha_surface.set_alpha(0)
 
-def draw_rect_alpha(surface, color, rect):
-    shape_surf = pygame.Surface(pygame.Rect(rect).size)
-    shape_surf.set_alpha(100)
-    shape_surf.fill('blue')
-    shape_surf.convert()
-    surface.blit(shape_surf, rect)
 # Helper functions
 def get_instruction_amount(info):
     result = []
@@ -239,7 +246,108 @@ def get_neighbours4(r,c):
     if c - 1 >= 0:
         neighbours.append(Cell.cell_grid[r][c - 1]) 
     return neighbours
+def get_random_cell_at_edge(island, cell_neighbour):
+    valid_cells = get_island_edge_cells(island, cell_neighbour)
+    return choice(valid_cells)
+def get_island_edge_cells(island, cell_neighbour):
+    valid_cells = []
+    for cell in island:
+        if cell.state != State.rock.value:
+            for c in cell_neighbour[cell]:
+                if c.state != State.alive.value:
+                   valid_cells.append(cell)
+                   break
+    return valid_cells
+def get_island_visited_dict(cell_neighbour):
+    # this will consider every state other than dead alive
+    result = {}
+    for cell in cell_neighbour:
+        if cell.state == State.dead.value:
+            result[cell] = True
+        else:
+            result[cell] = False
+    return result
+def get_lake_visited_dict(cell_neighbour):
+    visited = {}
+    for cell in cell_neighbour:
+        if cell not in visited:
+            if cell.state == State.dead.value:
+                visited[cell] = False
+            else:
+                visited[cell] = True
+    return visited
+def get_neighbour_dict(neighbour_func):
+    #max 8 neigbours
+    result = {}
+    for r in range(Cell.row_num):
+        for c in range(Cell.column_num):
+            result[
+                Cell.cell_grid[r][c]
+            ] = neighbour_func(r, c)
+    return result
+def get_longest_path(distance, start):
+    dist = 0
+    end = start
+    path = []
+    for cell, path_list in distance.items():
+        if len(path_list) > dist:
+            dist = len(path_list)
+            path = path_list
+            end = cell
+    return end, path
+def get_edge_side(index):
+    r = index[0]
+    c = index[1]
+    left = right = top = bottom = False
+    if r == Cell.row_num - 1:top = True
+    if r == 0:bottom = True
+    if c == Cell.column_num - 1:right = True
+    if c == 0:left = True 
+    return left, right, top, bottom
+def get_islands_extremes(island):
+    return left, right, top, bottom
 
+def generate_cells(screen):
+    columns = screen.current_width // Cell.cell_size
+    rows = screen.current_height // Cell.cell_size
+    Cell.column_num = columns
+    Cell.row_num = rows
+    cell_grid = [[Cell(screen, c * Cell.cell_size,r * Cell.cell_size, is_edge(r, c)) 
+                  for c in range(columns)]
+                 for r in range(rows)]
+    Cell.cell_grid = cell_grid
+    Cell.cell_neighbour_8 = get_neighbour_dict(get_neighbours8)
+    Cell.cell_neighbour_4 = get_neighbour_dict(get_neighbours4)
+    Cell.cell_neighbour_20 = get_neighbour_dict(get_neighbours20)
+    Cell.draw_all()
+def generate_path_dicts(island):
+    visited = {}
+    distance = {}
+    for cell in island:
+        visited[cell] = False
+        distance[cell] = []
+    return visited, distance
+
+def set_state(cells, state):
+    for cell in cells:
+        cell.state = state
+def flip_state(cells):
+    # any state other than alive will set the state to alive 
+    for cell in cells:
+        cell.state = State.dead.value if cell.state == State.alive.value else State.alive.value
+def reset_info():
+    Cell.iteration_num = 0
+    Cell.iteration_new_num = 0
+    Cell.island_round_num = 0
+    Cell.clean_num = 0
+    Cell.clean_bigger_num = 0
+    Cell.clean_huge_num = 0
+    Cell.wall_num = 0
+    Cell.wall2_num = 0
+    Cell.wall3_num = 0
+    Cell.wall4_num = 0
+
+# algorithms
 def cc_while_dfs(cell, visited, cell_neighbour):
     stack = deque()
     stack.append(cell)
@@ -252,33 +360,23 @@ def cc_while_dfs(cell, visited, cell_neighbour):
             if not visited[n]:
                 stack.append(n)
                 island.append(n)
-    return island
-def all_distances_from_cell(cell, visited, distance, cell_neighbour):
+    return list(set(island))
+def all_distances_from_cell(cell, island, cell_neighbour):
+    visited, distance = generate_path_dicts(island)
     q = queue.Queue()
     q.put(cell)
     visited[cell] = True
     distance[cell].append(cell)
+    count = 0
     while not q.empty():
         a = q.get()
-       
         for c in cell_neighbour[a]:
             if c.state == State.alive.value and not visited[c]:
                 distance[c] = distance[a] + [c]
                 visited[c] = True
                 q.put(c)
-
-
-def get_random_cell_at_edge(island, cell_neighbour):
-    valid_cells = []
-    for cell in island:
-        if cell.state != State.rock.value:
-            for c in cell_neighbour[cell]:
-                if c.state != State.alive.value:
-                   valid_cells.append(cell)
-                   break
-    return choice(valid_cells)
-
-
+    return distance
+# board rules
 def is_change_required(cell, cell_dict):
     count = len(list(filter(lambda cell : cell.state == State.alive.value, 
                cell_dict[cell])))
@@ -331,6 +429,7 @@ def is_wall(cell, cell_dict):
     if count < 7:
         return True if cell.state == State.alive.value else False
 
+# handle user input
 def handle_cell_size_increase(change, screen):
     new_size = Cell.cell_size + change
     if new_size <= screen.current_height // 10 and new_size <= screen.current_width // 10:
@@ -355,63 +454,13 @@ def handle_mouse_click(surface):
     # colour_cells(n, surface, 'Yellow')
 
 
-def generate_cells(screen):
-    columns = screen.current_width // Cell.cell_size
-    rows = screen.current_height // Cell.cell_size
-    Cell.column_num = columns
-    Cell.row_num = rows
-    cell_grid = [[Cell(screen, c * Cell.cell_size,r * Cell.cell_size, is_edge(r, c)) 
-                  for c in range(columns)]
-                 for r in range(rows)]
-    Cell.cell_grid = cell_grid
-    Cell.cell_neighbour_8 = generate_neighbour_dict(get_neighbours8)
-    Cell.cell_neighbour_4 = generate_neighbour_dict(get_neighbours4)
-    Cell.cell_neighbour_20 = generate_neighbour_dict(get_neighbours20)
-    Cell.draw_all()
-def generate_neighbour_dict(neighbour_func):
-    #max 8 neigbours
-    result = {}
-    for r in range(Cell.row_num):
-        for c in range(Cell.column_num):
-            result[
-                Cell.cell_grid[r][c]
-            ] = neighbour_func(r, c)
-    return result
-def generate_visited_dict(cell_neighbour):
-    # this will consider every state other than dead alive
-    result = {}
-    for cell in cell_neighbour:
-        if cell.state == State.dead.value:
-            result[cell] = True
-        else:
-            result[cell] = False
-    return result
-
-def set_state(cells, state):
-    for cell in cells:
-        cell.state = state
-def flip_state(cells):
-    for cell in cells:
-        cell.state = State.dead.value if cell.state == State.alive.value else State.alive.value
-def reset_info():
-    Cell.iteration_num = 0
-    Cell.iteration_new_num = 0
-    Cell.island_round_num = 0
-    Cell.clean_num = 0
-    Cell.clean_bigger_num = 0
-    Cell.clean_huge_num = 0
-    Cell.wall_num = 0
-    Cell.wall2_num = 0
-    Cell.wall3_num = 0
-    Cell.wall4_num = 0
-
 #   Instruction commands
 '''
 when adding a new command you have to add a variable in the cell class,
 add the new fucntion id the id_func and func_id, add it to reset_info, add where it gets updated
 '''
+@time_func
 def add_walls(screen):
-    print("add_walls")
     Cell.wall_num =+ 1
     cells_to_wall = []
     for r in range(Cell.row_num):
@@ -420,9 +469,9 @@ def add_walls(screen):
             if is_wall(cell, Cell.cell_neighbour_8):
                 cells_to_wall.append(cell)
     set_state(cells_to_wall, State.rock.value)
+@time_func
 def add_walls2(screen):
     Cell.wall2_num += 1
-    print("add_walls2")
     dead_cells = []
     cells_to_wall = []
 
@@ -439,9 +488,9 @@ def add_walls2(screen):
             if c not in cells_to_wall:
                 cells_to_wall.append(c)
     set_state(cells_to_wall, State.rock.value)
+@time_func
 def add_walls3(screen):
     Cell.wall3_num += 1
-    print("add_walls3")
     dead_cells = []
     cells_to_wall = []
 
@@ -449,17 +498,19 @@ def add_walls3(screen):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
             if cell.state == State.dead.value:
-                dead_cells.append(cell)
+                dead_cells.append([cell, (r, c)])
 
     for cell in dead_cells:
-        for c in Cell.cell_neighbour_8[cell]:
+        for c in Cell.cell_neighbour_8[cell[0]]:
             if c.state == State.alive.value:
-                cells_to_wall.append(cell)
+                if not cell[0].is_edge:
+                    cells_to_wall.append(cell[0])
                 break
     set_state(cells_to_wall, State.rock.value)
+    add_walls4(screen)
+@time_func
 def add_walls4(screen):
     Cell.wall3_num += 1
-    print("add_walls4")
     dead_cells = []
     cells_to_wall = []
 
@@ -474,8 +525,8 @@ def add_walls4(screen):
             if c.state == State.alive.value:
                 cells_to_wall.append(c)
     set_state(cells_to_wall, State.rock.value)
+@time_func
 def clean_up(screen):
-    print("clean_up")
     Cell.clean_num += 1
     cells_to_kill = []
     for r in range(Cell.row_num):
@@ -484,8 +535,8 @@ def clean_up(screen):
             if not is_clean(cell, 1, Cell.cell_neighbour_8):
                 cells_to_kill.append(cell)
     set_state(cells_to_kill, State.dead.value)
+@time_func
 def clean_up_bigger(screen):
-    print("clean_up_bigger")
     Cell.clean_bigger_num += 1
     cells_to_kill = []
     for r in range(Cell.row_num):
@@ -495,8 +546,8 @@ def clean_up_bigger(screen):
                 cells_to_kill.append(cell)
 
     set_state(cells_to_kill, State.dead.value)
+@time_func
 def clean_up_huge(screen):
-    print("clean_up_huge")
     Cell.clean_huge_num += 1
     cells_to_kill = []
     for r in range(Cell.row_num):
@@ -506,32 +557,31 @@ def clean_up_huge(screen):
                 cells_to_kill.append(cell)
 
     set_state(cells_to_kill, State.dead.value) 
+@time_func
 def randomise(screen):
-    print("randomise")
     reset_info()
     for r in range(Cell.row_num):
         for c in range(Cell.column_num):
             cell = Cell.cell_grid[r][c]
-            cell.state = State.dead.value if cell.is_edge else randint(State.dead.value, State.alive.value)
-    
+            cell.state = State.dead.value if cell.is_edge else randint(State.dead.value, State.alive.value)   
+@time_func
 def iterate(screen):
-    print("iterate")
     Cell.iteration_num += 1
     cells_to_change = get_cells_to_change(is_change_required, Cell.cell_neighbour_8)
     flip_state(cells_to_change)
+@time_func
 def iterate_new(screen):
-    print("iterate_new")
     Cell.iteration_new_num += 1
     cells_to_change = get_cells_to_change(is_trip_required, Cell.cell_neighbour_8)
     flip_state(cells_to_change)
+@time_func
 def island_round(screen):
-    print("iterate_big")
     Cell.island_round_num += 1
     cells_to_change = get_cells_to_change(is_change_big, Cell.cell_neighbour_20)
     flip_state(cells_to_change)
+@time_func
 def create_main_islands(screen):
-    print("create_main_islands")
-    visited = generate_visited_dict(Cell.cell_neighbour_8)
+    visited = get_island_visited_dict(Cell.cell_neighbour_8)
     islands = []
     for cell in Cell.cell_neighbour_8:
         if not visited[cell]:
@@ -552,18 +602,10 @@ def create_main_islands(screen):
             set_state(island, State.dead.value )
     else:
         Cell.islands = islands
+@time_func
 def find_lakes(screen):
-    print("bad lind lakes")
-    # create visited
-    visited = {}
     islands = []
-    for cell in Cell.cell_neighbour_8:
-        if cell not in visited:
-            if cell.state == State.dead.value:
-                visited[cell] = False
-            else:
-                visited[cell] = True
-
+    visited = get_lake_visited_dict(Cell.cell_neighbour_8)
     for cell in Cell.cell_neighbour_8:
         if not visited[cell]:
             island = cc_while_dfs(cell, visited, Cell.cell_neighbour_8)
@@ -574,28 +616,34 @@ def find_lakes(screen):
                   ## only works when the biggest dead island is the one surrounding the live islands
     for island in islands: 
         set_state(island, State.lake.value)
-def create_longest_path(screen):
-    print("create_longest_path")
+@time_func
+def create_path(screen):
     for island in Cell.islands:
         start = get_random_cell_at_edge(island, Cell.cell_neighbour_4)
-        visited = {}
-        distance = {}
-        for cell in island:
-            visited[cell] = False
-            distance[cell] = []
-        all_distances_from_cell(start, visited, distance, Cell.cell_neighbour_4)
-    
-        dist = 0
-        end = start
-        path = []
-    
-        for cell, distance in distance.items():
-            if dist < len(distance):
-                dist = len(distance)
-                path = distance
-                end = cell
+        distances = all_distances_from_cell(start, island, Cell.cell_neighbour_4)
+        end, path = get_longest_path(distances, start)
         if len(path) > 8:
             set_state(path, State.path.value)
+            start.draw('yellow')
+            end.draw('red')
+@time_func
+def create_longest_path(screen):
+    main_island = Cell.islands[0]
+    # left, right, top, bottom = get_islands_extremes(main_island)
+    edge = get_island_edge_cells(main_island, Cell.cell_neighbour_4)
+    longest_path = []
+    start = None
+    finish = None
+    print(len(edge))
+    # for cell in edge:
+    #     distances = all_distances_from_cell(cell, main_island, Cell.cell_neighbour_4)
+    #     end, path = get_longest_path(distances, cell)
+    #     if len(path) >= len(longest_path):
+    #         start = cell
+    #         end = finish
+    #         longest_path = path
+    set_state(longest_path, State.path.value)
+@time_func
 def create_territories(screen):
     # Cell.islands.sort()
     # main_island = Cell.islands.sort()
@@ -622,8 +670,9 @@ func_id = {
     island_round: 11,
     create_main_islands: 12,
     find_lakes: 13,
-    create_longest_path: 14,
+    create_path: 14,
     create_territories: 15,
+    create_longest_path: 16,
 }
 id_func = {
     1: add_walls,
@@ -639,6 +688,7 @@ id_func = {
     11: island_round,
     12: create_main_islands,
     13: find_lakes,
-    14: create_longest_path,
+    14: create_path,
     15: create_territories,
+    16: create_longest_path,
 }
