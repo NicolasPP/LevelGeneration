@@ -1,38 +1,21 @@
 from time_wait import regular_interval_tick_wait
 import pygame
-from config import FULLSCREEN, DELAY
 from screen import Screen
 from cell import *
-from instruction import Instructions_manager
-
+from instruction_manager import Instructions_manager
+from generator_functions import func_manager, func_id, id_func
 """
 ------------- RESTRUCTURING -------------
-TODO add event parser class if game loop gets too long
-TODO make checking for event.key == --- into a switch statement
+TODO Make a dict with all repeated rendered things eg. function name
+     instruction name.
 ------------- ------------- -------------
-------------- USER -------------
-TODO make lable showing it record_instruction is recording or not
-TODO show the instruction list being created on the left of the screen where
-     current_board info goes
-TODO when user hit the create button must check length of instruction, if 0 then
-     dont create a new instruction, for now the current cell size will always be
-     added to the new Instruction. For now we will have to generate a name for the
-     instruction added. Maybe - f'{tile_size}_{count}'
-TODO Be able to create instructions 
-TODO Be able to delete instructions
-------------- ---- -------------
 """
-
-record_instruction = False
 show_board_info = False
 show_key_binds = False
 show_territories = False
 done = False
-perform = False
-perform_index = 0
-func_index = 1
 screen = Screen(1600,900, FULLSCREEN)
-manager = Instructions_manager()
+manager = Instructions_manager(id_func, screen)
 
 screen.display()
 generate_cells(screen)
@@ -42,75 +25,57 @@ Cell.draw_all()
 def toggle_show_territories():
     global show_territories
     show_territories = not show_territories
-    # draw()
-def toggle_perform():
-    global perform, perform_index
-    perform = not perform
-    perform_index = 0
-    manager.handle_optional_resize(screen)
+    Cell.draw_all()
 def toggle_show_board():
     global show_board_info
     show_board_info = not show_board_info
     Cell.draw_all()
+
+
 def toggle_show_key():
     global show_key_binds
     show_key_binds = not show_key_binds
     Cell.draw_all()
-def toggle_record_instructions():
-    global record_instruction
-    record_instruction = not record_instruction
-    Cell.draw_all()
-def handle_func_change(handler):
-    global func_index
-    func_index = handler(func_index)
-    Cell.draw_all()
 def handle_full_screen():
     screen.toggle_full_screen()
     generate_cells(screen)
-def handle_perform():
-    global perform, perform_index
-    if perform:
-        if regular_interval_tick_wait(DELAY):
-            perform = manager.perform(perform_index, screen)
-            perform_index += 1
-def handle_func_next(func_index):
-    size = len(func_id)
-    next = func_index + 1
-    if next <= size:
-        return next
-    return func_index
-def handle_func_prev(func_index):
-    prev = func_index - 1
-    if prev >= 1:
-        return prev
-    return func_index
+def handle_func_perform():
+    func_name = func_manager.get_current_func_name()
+    id_func[func_name](screen)
+    manager.add_step(func_name)    
 def display_GUI_info():
-    display_current_board_information(show_board_info and not record_instruction)
-    display_current_instruction_info(manager.get_current_instruction(), screen, show_board_info)
+    manager.show_new_instruction(show_board_info)
+    manager.show_current_instruction(screen, show_board_info)
     display_key_binds(show_key_binds, screen)
-    display_current_command(screen, func_index)
+    func_manager.display_current_command(screen)
+def handle_mouse_click():
+    if manager.show_del_alert:
+        manager.handle_del_mouse_click(pygame.mouse.get_pos())
+
 
 while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: done = True
-        if event.type == pygame.MOUSEBUTTONDOWN: handle_mouse_click(screen.surface)
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN: handle_mouse_click()
+        if event.type == pygame.KEYDOWN and not manager.show_del_alert:
             if event.key == pygame.K_ESCAPE: done = True
-            if event.key == pygame.K_SPACE: id_func[func_index](screen)
+            if event.key == pygame.K_SPACE: handle_func_perform()
             if event.key == pygame.K_UP: handle_cell_size_increase(5, screen)
             if event.key == pygame.K_DOWN: handle_cell_size_decrease(5, screen)
             if event.key == pygame.K_LEFT: manager.decrease_index()
             if event.key == pygame.K_RIGHT: manager.increase_index()
-            if event.key == pygame.K_COMMA: handle_func_change(handle_func_prev)
-            if event.key == pygame.K_PERIOD: handle_func_change(handle_func_next)
-            if event.key == pygame.K_TAB and not perform: toggle_perform()
-            if event.key == pygame.K_n: toggle_record_instructions()
+            if event.key == pygame.K_COMMA: func_manager.handle_index_decrease()
+            if event.key == pygame.K_PERIOD: func_manager.handle_index_increase()
+            if event.key == pygame.K_TAB and not manager.perform: manager.toggle_perform(screen)
             if event.key == pygame.K_s: toggle_show_board()
             if event.key == pygame.K_k: toggle_show_key()
             if event.key == pygame.K_f: handle_full_screen()
             if event.key == pygame.K_m: toggle_show_territories()
+            if event.key == pygame.K_c: manager.create_new_instruction()
+            if event.key == pygame.K_p: manager.toggle_show_delete()
     
-    handle_perform()
+    manager.handle_perform(screen)
+    manager.display_del_alert(screen)
     display_GUI_info()
     display_territories(screen, show_territories)
     pygame.display.flip()
