@@ -130,9 +130,11 @@ class Instructions_manager:
 
 
     def get_del_GUI(self, screen):
+        current_instruction = self.get_current_instruction()
+        instruction_name = current_instruction[NAME]
         yes = Lable('Yes', (screen.current_width // 2) + 15, (screen.current_height // 2) + 30, 20, 'Red')
         no = Lable('No', (screen.current_width // 2) - 15, (screen.current_height // 2) + 30, 20, 'Green')
-        warn = Lable('Do you want to delete current instruction', (screen.current_width // 2), (screen.current_height // 2), 20, 'Red')
+        warn = Lable(f'Do you want to delete instruction: {instruction_name}', (screen.current_width // 2), (screen.current_height // 2), 20, 'Red')
         warn.center()
         return yes, no, warn
     def display_del_alert(self, screen):
