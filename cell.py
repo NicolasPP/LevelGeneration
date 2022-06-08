@@ -79,7 +79,18 @@ class Cell:
                 Cell.cell_grid[r][c].alpha_surface.set_alpha(alpha)
     @staticmethod
     def reset_info():
-        Cell.points = []    
+        Cell.points = [] 
+
+    @staticmethod
+    def get_board():
+        result =[]
+        for r in range(Cell.row_num):
+            row = []
+            for c in range(Cell.column_num):
+                cell = Cell.cell_grid[r][c]
+                row.append(cell.state)
+            result.append(row)
+        return result
 
 # Draw functions
 def colour_cells(cells, colour):
