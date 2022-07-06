@@ -5,6 +5,9 @@ from time_wait import regular_interval_tick_wait
 from cell import *
 
 from utils import time_func
+'''
+TODO: add button to reset the current board steps
+'''
 
 class Instructions_manager:
     current_instruction = ""
@@ -14,10 +17,11 @@ class Instructions_manager:
         self.perform = False
         self.perform_index = 0
         self.file = file
+        self.screen = screen
         self.read_instructions()
         self.current_board_steps = []
         self.show_del_alert = False
-        self.yes, self.no, self.warn =  self.get_del_GUI(screen)
+        self.update_del_GUI()
         
     def write_instructions(self):
         if len(self.instructions) < 1:
@@ -54,11 +58,13 @@ class Instructions_manager:
             self.index += 1
             Instructions_manager.current_instruction = self.get_current_instruction()[NAME]
             Cell.draw_all()
+        self.update_del_GUI()
     def decrease_index(self):
         if self.index > 0:
             self.index -= 1
             Instructions_manager.current_instruction = self.get_current_instruction()[NAME]
             Cell.draw_all()
+        self.update_del_GUI()
 
     #execution
 
@@ -129,14 +135,18 @@ class Instructions_manager:
         if inst_size <= self.index: self.index = inst_size - 1
 
 
-    def get_del_GUI(self, screen):
+    def get_del_GUI(self):
         current_instruction = self.get_current_instruction()
         instruction_name = current_instruction[NAME]
-        yes = Lable('Yes', (screen.current_width // 2) + 15, (screen.current_height // 2) + 30, 20, 'Red')
-        no = Lable('No', (screen.current_width // 2) - 15, (screen.current_height // 2) + 30, 20, 'Green')
-        warn = Lable(f'Do you want to delete instruction: {instruction_name}', (screen.current_width // 2), (screen.current_height // 2), 20, 'Red')
+        yes = Lable('Yes', (self.screen.current_width // 2) + 15, (self.screen.current_height // 2) + 30, 20, 'Red')
+        no = Lable('No', (self.screen.current_width // 2) - 15, (self.screen.current_height // 2) + 30, 20, 'Green')
+        warn = Lable(f'Do you want to delete instruction: {instruction_name}', (self.screen.current_width // 2), (self.screen.current_height // 2), 20, 'Red')
         warn.center()
         return yes, no, warn
+
+    def update_del_GUI(self):
+        self.yes, self.no, self.warn = self.get_del_GUI()
+
     def display_del_alert(self, screen):
         if self.show_del_alert:
             self.yes.draw(screen.surface)
