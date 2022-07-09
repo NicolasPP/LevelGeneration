@@ -15,6 +15,7 @@ KEY_BINDS = {
     "k" : "toggle show keybind information",
     "m" : "show territories",
     "c" : "create new instruction from existing board steps",
+    "r" : "reset current board instructions",
     "ESCAPE" : "quit",
     "COMMA" : "prev command",
     "PERIOD" : "next command",
