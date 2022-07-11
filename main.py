@@ -3,7 +3,7 @@ import pygame
 from screen import Screen
 from cell import *
 from instruction_manager import Instructions_manager
-from generator_functions import func_manager, func_id, id_func
+from generator_functions import func_manager, func_id, id_func, randomise
 """
 ------------- RESTRUCTURING -------------
 TODO Make a dict with all repeated rendered things eg. function name
@@ -14,7 +14,7 @@ show_board_info = False
 show_key_binds = False
 show_territories = False
 done = False
-screen = Screen(1600,900, FULLSCREEN)
+screen = Screen(1280,800, FULLSCREEN)
 manager = Instructions_manager(id_func, screen)
 
 screen.display()
@@ -51,7 +51,11 @@ def display_GUI_info():
 def handle_mouse_click():
     if manager.show_del_alert:
         manager.handle_del_mouse_click(pygame.mouse.get_pos())
-
+def handle_board_reset():
+    randomise(screen)
+    Cell.draw_all()
+    manager.reset_current_board()
+    
 
 while not done:
     for event in pygame.event.get():
@@ -73,7 +77,7 @@ while not done:
             if event.key == pygame.K_m: toggle_show_territories()
             if event.key == pygame.K_c: manager.create_new_instruction()
             if event.key == pygame.K_p: manager.toggle_show_delete()
-    
+            if event.key == pygame.K_r: handle_board_reset()    
     manager.handle_perform(screen)
     manager.display_del_alert(screen)
     display_GUI_info()

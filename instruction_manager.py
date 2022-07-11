@@ -5,9 +5,7 @@ from time_wait import regular_interval_tick_wait
 from cell import *
 
 from utils import time_func
-'''
-TODO: add button to reset the current board steps
-'''
+
 
 class Instructions_manager:
     current_instruction = ""
@@ -23,6 +21,7 @@ class Instructions_manager:
         self.show_del_alert = False
         self.update_del_GUI()
         
+    #read and write 
     def write_instructions(self):
         if len(self.instructions) < 1:
             return
@@ -42,6 +41,9 @@ class Instructions_manager:
             open_file.close()
     
     #helper functions
+    def reset_current_board(self):
+        self.current_board_steps = []
+        Cell.draw_all()
     def add(self, instruction):
         if instruction not in self.instructions:
             self.instructions.append(instruction)
@@ -77,7 +79,7 @@ class Instructions_manager:
         self.perform = not self.perform
         self.perform_index = 0
         self.handle_optional_resize(screen)
-        if self.perform: self.current_board_steps = []
+        if self.perform: self.reset_current_board()
     def perform_step(self, screen):
         steps = self.current_instruction[INFO][INST]
         current_func_id = steps[self.perform_index]
